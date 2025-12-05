@@ -7,7 +7,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-// Custom theme settings
 data class MindPlayColors(
     val background: Color,
     val buttonPrimary: Color,
@@ -26,7 +25,6 @@ data class MindPlayColors(
     val simonYellow: Color
 )
 
-// High contrast color scheme
 private val HighContrastColors = MindPlayColors(
     background = BackgroundLight,
     buttonPrimary = ButtonPrimaryBackground,
@@ -45,7 +43,6 @@ private val HighContrastColors = MindPlayColors(
     simonYellow = SimonYellow
 )
 
-// Low contrast color scheme
 private val LowContrastColors = MindPlayColors(
     background = BackgroundLight,
     buttonPrimary = ButtonSecondaryBackground,
@@ -64,7 +61,6 @@ private val LowContrastColors = MindPlayColors(
     simonYellow = SimonYellow
 )
 
-// CompositionLocal for custom colors
 val LocalMindPlayColors = staticCompositionLocalOf { HighContrastColors }
 
 @Composable
@@ -95,7 +91,6 @@ fun MindPlayTheme(
     }
 }
 
-// Extension to access custom colors
 object MindPlayTheme {
     val colors: MindPlayColors
         @Composable
