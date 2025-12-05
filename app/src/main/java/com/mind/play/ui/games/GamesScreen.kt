@@ -1,12 +1,7 @@
 package com.mind.play.ui.games
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,17 +15,12 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mind.play.R
+import com.mind.play.core.components.AnimatedCard
 import com.mind.play.ui.theme.MindPlayTheme
 
 data class Game(
@@ -94,36 +84,15 @@ private fun GameCard(
     game: Game,
     onClick: () -> Unit
 ) {
-    var isPressed by remember { androidx.compose.runtime.mutableStateOf(false) }
-    
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.92f else 1f,
-        animationSpec = tween(
-            durationMillis = 100,
-            easing = androidx.compose.animation.core.FastOutSlowInEasing
-        ),
-        label = "scale"
-    )
-    
-    Image(
-        painter = painterResource(id = game.drawableRes),
-        contentDescription = game.name,
-        modifier = Modifier
-            .aspectRatio(1f)
-            .scale(scale)
-            .clickable(
-                onClick = onClick,
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            )
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        isPressed = true
-                        tryAwaitRelease()
-                        isPressed = false
-                    }
-                )
-            }
-    )
+    AnimatedCard(
+        onClick = onClick,
+        pressScale = 0.92f,
+        animationDuration = 100
+    ) { modifier ->
+        Image(
+            painter = painterResource(id = game.drawableRes),
+            contentDescription = game.name,
+            modifier = modifier.aspectRatio(1f)
+        )
+    }
 }

@@ -111,6 +111,31 @@ MindPlayRadioButton(
 - Автоматично використовується в NavGraph
 - Іконки: ic_home, ic_games, ic_settings
 
+##### AnimatedCard
+**Універсальний компонент для анімованих карток з ефектом натискання**
+
+```kotlin
+AnimatedCard(
+    onClick = { /* клік */ },
+    pressScale = 0.92f,
+    animationDuration = 100
+) { modifier ->
+    Image(
+        painter = painterResource(id = R.drawable.card_memory),
+        contentDescription = "Memory",
+        modifier = modifier.aspectRatio(1f)
+    )
+}
+```
+
+Параметри:
+- `pressScale` - масштаб при натисканні (за замовчуванням 0.92f)
+- `animationDuration` - тривалість анімації в мілісекундах (за замовчуванням 100)
+- `onClick` - callback при натисканні
+- `content` - вміст картки (отримує modifier з анімацією)
+
+Використовується в: GamesScreen для карток ігор
+
 ---
 
 ## Дані для передачі (для інших осіб)
@@ -189,7 +214,50 @@ composable(Screen.GameMemory.route) {
 
 ## Анімації (ОСОБА 7 - реалізувати)
 
-### Реалізація анімацій (для використання всюди)
+### ✅ Реалізовані готові компоненти анімацій
+
+#### NavigationAnimations (core/navigation/NavigationAnimations.kt)
+**Об'єкт з готовими анімаціями переходів між екранами**
+
+Доступні анімації:
+```kotlin
+// Fade in/out (за замовчуванням використовується в навігації)
+NavigationAnimations.fadeInTransition(durationMillis = 200)
+NavigationAnimations.fadeOutTransition(durationMillis = 200)
+
+// Slide з права наліво (для прямих переходів)
+NavigationAnimations.slideInFromRightTransition(durationMillis = 300)
+NavigationAnimations.slideOutToLeftTransition(durationMillis = 300)
+
+// Slide зліва направо (для повернення назад)
+NavigationAnimations.slideInFromLeftTransition(durationMillis = 300)
+NavigationAnimations.slideOutToRightTransition(durationMillis = 300)
+```
+
+Використання в NavHost:
+```kotlin
+NavHost(
+    enterTransition = { NavigationAnimations.fadeInTransition() },
+    exitTransition = { NavigationAnimations.fadeOutTransition() }
+) {
+    composable(
+        route = Screen.GameDetails.route,
+        enterTransition = { NavigationAnimations.slideInFromRightTransition() },
+        exitTransition = { NavigationAnimations.slideOutToLeftTransition() },
+        popEnterTransition = { NavigationAnimations.slideInFromLeftTransition() },
+        popExitTransition = { NavigationAnimations.slideOutToRightTransition() }
+    ) {
+        GameDetailsScreen()
+    }
+}
+```
+
+#### AnimatedCard (core/components/AnimatedCard.kt)
+**Компонент для карток з анімацією натискання**
+- Див. розділ "Компоненти" вище для деталей
+- Використовується в GamesScreen для карток ігор
+
+### Реалізація додаткових анімацій (для використання в іграх)
 
 #### Анімація входу елемента (fade + scale)
 ```kotlin
@@ -250,8 +318,9 @@ val backgroundColor by animateColorAsState(
 - Автоматично анімується при зміні `current`
 
 #### Переходи між екранами
-- Визначені в NavGraph: fadeIn/fadeOut
-- Час: за замовчуванням (300мс)
+- Використовуй `NavigationAnimations` (див. вище)
+- Fade анімації вже налаштовані в NavGraph
+- Для складніших переходів використовуй slide анімації
 
 ---
 

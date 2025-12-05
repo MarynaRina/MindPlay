@@ -1,7 +1,5 @@
 package com.mind.play.core.navigation
 
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -52,8 +50,8 @@ fun MindPlayNavigation() {
             navController = navController,
             startDestination = Screen.Splash.route,
             modifier = Modifier.padding(paddingValues),
-            enterTransition = { fadeIn() },
-            exitTransition = { fadeOut() }
+            enterTransition = { NavigationAnimations.fadeInTransition() },
+            exitTransition = { NavigationAnimations.fadeOutTransition() }
         ) {
             composable(Screen.Splash.route) {
                 SplashScreen(
