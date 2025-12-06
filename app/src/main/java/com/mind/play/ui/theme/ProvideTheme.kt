@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.mind.play.data.repository.SettingsRepository
+import com.mind.play.domain.models.AppSettings
 import org.koin.compose.koinInject
 
 @Composable
@@ -12,10 +13,11 @@ fun ProvideTheme(
     content: @Composable () -> Unit
 ) {
     val settings by settingsRepository.settings.collectAsState()
+    val currentSettings = settings ?: AppSettings()
     
     MindPlayTheme(
-        highContrast = settings.highContrast,
-        textSize = settings.textSize,
+        highContrast = currentSettings.highContrast,
+        textSize = currentSettings.textSize,
         content = content
     )
 }

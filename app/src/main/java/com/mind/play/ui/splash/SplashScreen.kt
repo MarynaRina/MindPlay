@@ -32,19 +32,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mind.play.R
+import com.mind.play.ui.theme.ButtonPrimaryBackground
 import com.mind.play.ui.theme.RubikBold
 import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
-    onNavigateToMain: () -> Unit
+    settingsLoaded: Boolean,
+    shouldShowOnboarding: Boolean,
+    onNavigateToWelcome: () -> Unit,
+    onNavigateToHome: () -> Unit
 ) {
     var iconVisible by remember { mutableStateOf(false) }
     
-    LaunchedEffect(Unit) {
-        iconVisible = true
-        delay(2000)
-        onNavigateToMain()
+    LaunchedEffect(settingsLoaded, shouldShowOnboarding) {
+        if (settingsLoaded) {
+            iconVisible = true
+            delay(2000)
+            if (shouldShowOnboarding) {
+                onNavigateToWelcome()
+            } else {
+                onNavigateToHome()
+            }
+        }
     }
     
     val iconAlpha = androidx.compose.animation.core.animateFloatAsState(
@@ -60,7 +70,7 @@ fun SplashScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary),
+            .background(ButtonPrimaryBackground),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

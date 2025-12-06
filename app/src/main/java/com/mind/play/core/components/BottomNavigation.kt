@@ -3,6 +3,7 @@ package com.mind.play.core.components
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -13,15 +14,12 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mind.play.R
 import com.mind.play.core.navigation.BottomNavItem
 import com.mind.play.core.navigation.bottomNavItems
 import com.mind.play.ui.theme.BackgroundLight
-import com.mind.play.ui.theme.InterRegular
-import com.mind.play.ui.theme.NavIconSelected
+import com.mind.play.ui.theme.MindPlayTheme
 import com.mind.play.ui.theme.NavIconUnselected
 import com.mind.play.ui.theme.NavLabelColor
 
@@ -51,6 +49,8 @@ fun MindPlayBottomNavigation(
                 is BottomNavItem.Settings -> R.drawable.ic_settings
             }
             
+            val labelColor = if (selected) MindPlayTheme.colors.buttonPrimary else NavLabelColor
+            
             NavigationBarItem(
                 selected = selected,
                 onClick = { onNavigate(item.route) },
@@ -64,14 +64,12 @@ fun MindPlayBottomNavigation(
                 label = {
                     Text(
                         text = item.label,
-                        fontFamily = InterRegular,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp,
-                        color = NavLabelColor
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = labelColor
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = NavIconSelected,
+                    selectedIconColor = MindPlayTheme.colors.buttonPrimary,
                     unselectedIconColor = NavIconUnselected,
                     indicatorColor = BackgroundLight
                 )

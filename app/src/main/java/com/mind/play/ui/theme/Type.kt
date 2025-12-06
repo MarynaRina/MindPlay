@@ -21,49 +21,51 @@ val InterRegular = FontFamily(
 )
 
 fun getTypography(textSize: TextSize = TextSize.MEDIUM): Typography {
-    val multiplier = when (textSize) {
-        TextSize.SMALL -> 0.85f
-        TextSize.MEDIUM -> 1f
-        TextSize.LARGE -> 1.15f
+    val offset = when (textSize) {
+        TextSize.SMALL -> -5
+        TextSize.MEDIUM -> 0
+        TextSize.LARGE -> 5
     }
+    
+    fun adjusted(value: Int) = (value + offset).coerceAtLeast(8).sp
 
     return Typography(
         displayLarge = TextStyle(
             fontFamily = RubikBold,
             fontWeight = FontWeight.Bold,
-            fontSize = (32 * multiplier).sp,
-            lineHeight = (40 * multiplier).sp
+            fontSize = adjusted(40),
+            lineHeight = adjusted(48)
         ),
         bodyLarge = TextStyle(
             fontFamily = InterRegular,
             fontWeight = FontWeight.Normal,
-            fontSize = (20 * multiplier).sp,
-            lineHeight = (28 * multiplier).sp
+            fontSize = adjusted(18),
+            lineHeight = adjusted(26)
         ),
         bodyMedium = TextStyle(
             fontFamily = InterRegular,
             fontWeight = FontWeight.Normal,
-            fontSize = (16 * multiplier).sp,
-            lineHeight = (24 * multiplier).sp
+            fontSize = adjusted(16),
+            lineHeight = adjusted(22)
         ),
         labelLarge = TextStyle(
             fontFamily = RubikMedium,
             fontWeight = FontWeight.Medium,
-            fontSize = (24 * multiplier).sp,
-            lineHeight = (32 * multiplier).sp,
+            fontSize = adjusted(20),
+            lineHeight = adjusted(28),
             letterSpacing = 1.sp
         ),
         titleLarge = TextStyle(
             fontFamily = RubikBold,
             fontWeight = FontWeight.Bold,
-            fontSize = (32 * multiplier).sp,
-            lineHeight = (40 * multiplier).sp
+            fontSize = adjusted(32),
+            lineHeight = adjusted(40)
         ),
         titleMedium = TextStyle(
             fontFamily = RubikMedium,
             fontWeight = FontWeight.Medium,
-            fontSize = (24 * multiplier).sp,
-            lineHeight = (32 * multiplier).sp
+            fontSize = adjusted(24),
+            lineHeight = adjusted(32)
         )
     )
 }

@@ -12,8 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.mind.play.ui.theme.ButtonPrimaryBackground
 import com.mind.play.ui.theme.InactiveGray
+import com.mind.play.ui.theme.MindPlayTheme
 
 @Composable
 fun MindPlayProgressBar(
@@ -41,7 +41,7 @@ fun MindPlayProgressBar(
                 .fillMaxWidth(animatedProgress)
                 .height(16.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(ButtonPrimaryBackground)
+                .background(MindPlayTheme.colors.buttonPrimary)
         )
     }
 }

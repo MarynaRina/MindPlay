@@ -22,8 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.mind.play.ui.theme.ButtonPrimaryBackground
 import com.mind.play.ui.theme.InactiveGray
+import com.mind.play.ui.theme.MindPlayTheme
 
 @Composable
 fun MindPlayToggle(
@@ -45,7 +45,7 @@ fun MindPlayToggle(
             .background(Color.Transparent)
             .border(
                 width = 2.dp,
-                color = if (checked) ButtonPrimaryBackground else InactiveGray,
+                color = if (checked) MindPlayTheme.colors.buttonPrimary else InactiveGray,
                 shape = RoundedCornerShape(20.dp)
             )
             .clickable(
@@ -61,7 +61,7 @@ fun MindPlayToggle(
                 .size(32.dp)
                 .offset(x = offsetX)
                 .clip(CircleShape)
-                .background(if (checked) ButtonPrimaryBackground else InactiveGray)
+                .background(if (checked) MindPlayTheme.colors.buttonPrimary else InactiveGray)
         )
     }
 }

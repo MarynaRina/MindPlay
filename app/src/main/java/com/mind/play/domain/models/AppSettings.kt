@@ -8,5 +8,6 @@ data class AppSettings(
     val stressMode: Boolean = false,
     val uiSoundEnabled: Boolean = true,
     val gameSoundEnabled: Boolean = true,
-    val notificationsEnabled: Boolean = false
+    val notificationsEnabled: Boolean = false,
+    val onboardingCompleted: Boolean = false
 )

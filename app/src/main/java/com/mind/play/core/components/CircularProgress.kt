@@ -10,15 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mind.play.ui.theme.ButtonPrimaryBackground
 import com.mind.play.ui.theme.InactiveGray
+import com.mind.play.ui.theme.MindPlayTheme
 import com.mind.play.ui.theme.RubikBold
 
 @Composable
@@ -37,6 +36,8 @@ fun CircularProgressBar(
         animationSpec = tween(durationMillis = 600),
         label = "circular_progress"
     )
+    val primaryColor = MindPlayTheme.colors.buttonPrimary
+    val textColor = MindPlayTheme.colors.textPrimary
     
     Box(
         modifier = modifier.size(size),
@@ -55,7 +56,7 @@ fun CircularProgressBar(
             
             if (animatedProgress > 0f) {
                 drawArc(
-                    color = ButtonPrimaryBackground,
+                    color = primaryColor,
                     startAngle = -90f,
                     sweepAngle = sweepAngle,
                     useCenter = false,
@@ -69,7 +70,7 @@ fun CircularProgressBar(
             fontFamily = RubikBold,
             fontWeight = FontWeight.Bold,
             fontSize = 32.sp,
-            color = Color.Black
+            color = textColor
         )
     }
 }

@@ -15,10 +15,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mind.play.R
 import com.mind.play.core.components.AnimatedCard
 import com.mind.play.ui.theme.MindPlayTheme
@@ -49,17 +49,16 @@ fun GamesScreen() {
         Text(
             text = "Gry",
             style = MaterialTheme.typography.displayLarge,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MindPlayTheme.colors.textHeading
         )
         
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
             text = "Zagraj w grę",
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontSize = 16.sp
-            ),
-            color = MindPlayTheme.colors.textSecondary
+            style = MaterialTheme.typography.bodyLarge,
+            color = MindPlayTheme.colors.textSecondary,
+            modifier = Modifier.align(Alignment.Start)
         )
         
         Spacer(modifier = Modifier.height(24.dp))

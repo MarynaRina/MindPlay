@@ -70,6 +70,7 @@ fun MindPlayTheme(
     content: @Composable () -> Unit
 ) {
     val customColors = if (highContrast) HighContrastColors else LowContrastColors
+    val typography = getTypography(textSize)
     
     val colorScheme = lightColorScheme(
         primary = customColors.buttonPrimary,
@@ -85,7 +86,7 @@ fun MindPlayTheme(
     CompositionLocalProvider(LocalMindPlayColors provides customColors) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = getTypography(textSize),
+            typography = typography,
             content = content
         )
     }
