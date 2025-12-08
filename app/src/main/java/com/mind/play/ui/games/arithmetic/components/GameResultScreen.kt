@@ -43,14 +43,14 @@ fun GameResultScreen(
         Column(
             modifier = Modifier
                 .padding(horizontal = 32.dp)
-                .height(460.dp),
+                .height(600.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top
         ) {
-            // Заголовок
+            // Заголовок з емодзі
             Text(
                 text = if (isSuccess) {
-                    "Brawo!\nUdało Ci się\nukończyć grę!"
+                    "Brawo! 🎉\nUdało Ci się\nukończyć grę!"
                 } else {
                     "Spróbuj\njeszcze raz"
                 },
@@ -60,25 +60,36 @@ fun GameResultScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Опис
+            // Блакитна картка з інформацією
             if (isSuccess) {
-                Text(
-                    text = "Świetna robota! 🙌 Oto Twój wynik:",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MindPlayTheme.colors.textSecondary
-                )
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                timeTaken?.let {
-                    ResultItem(label = "Czas:", value = it)
-                    Spacer(modifier = Modifier.height(16.dp))
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color(0xFFE3F2FD)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = "Świetna robota! 🙌 Oto Twój wynik:",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MindPlayTheme.colors.textHeading
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        timeTaken?.let {
+                            ResultItem(label = "Czas:", value = it)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        
+                        ResultItem(
+                            label = "Poprawne odpowiedzi:",
+                            value = "$score/$totalTasks"
+                        )
+                    }
                 }
-                
-                ResultItem(
-                    label = "Poprawne odpowiedzi:",
-                    value = "$score/$totalTasks"
-                )
             } else {
                 Text(
                     text = "Nie udało się tym razem, ale możesz spróbować ponownie. Każda próba to ćwiczenie i postęp.",
