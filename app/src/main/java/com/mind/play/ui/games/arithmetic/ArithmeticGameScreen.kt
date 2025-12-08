@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,11 +25,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mind.play.R
+import com.mind.play.core.components.GameResultScreen
 import com.mind.play.core.components.MindPlayProgressBar
-import com.mind.play.ui.games.arithmetic.components.GameResultScreen
 import com.mind.play.ui.games.arithmetic.components.PauseOverlay
 import com.mind.play.ui.games.arithmetic.components.TaskCard
 import com.mind.play.ui.theme.MindPlayTheme
@@ -56,7 +53,7 @@ fun ArithmeticGameScreen(
             )
         }
         gameState.isFinished -> {
-            val isSuccess = gameState.score >= (gameState.totalTasks * 0.6).toInt() // 60% правильних відповідей
+            val isSuccess = gameState.score >= (gameState.totalTasks * 0.6).toInt()
             val timeTaken = if (!gameState.stressMode) {
                 viewModel.formatTime(120 - gameState.timeLeftSeconds)
             } else null
@@ -95,7 +92,6 @@ private fun GameContent(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(top = 16.dp)
         ) {
-            // Верхнє меню з прогресом
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -116,7 +112,6 @@ private fun GameContent(
                 
                 Spacer(modifier = Modifier.weight(1f))
                 
-                // Показати таймер якщо режим без стресу вимкнений
                 if (!gameState.stressMode) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -166,7 +161,6 @@ private fun GameContent(
                 }
             }
 
-            // Progress Bar
             MindPlayProgressBar(
                 current = gameState.currentTaskIndex,
                 total = gameState.totalTasks,
