@@ -68,7 +68,7 @@ fun GameResultScreen(
                     ) {
                         Text(
                             text = "Świetna robota! 🙌 Oto Twój wynik:",
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MindPlayTheme.colors.textHeading
                         )
                         
@@ -128,7 +128,7 @@ private fun ResultItem(
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
             color = MindPlayTheme.colors.textHeading
         )
     }
