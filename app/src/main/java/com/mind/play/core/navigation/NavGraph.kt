@@ -14,6 +14,7 @@ import com.mind.play.core.components.MindPlayBottomNavigation
 import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.ui.dashboard.HomeScreen
 import com.mind.play.ui.games.GamesScreen
+import com.mind.play.ui.games.arithmetic.ArithmeticGameScreen
 import com.mind.play.ui.onboarding.OnboardingScreen
 import com.mind.play.ui.onboarding.WelcomeScreen
 import com.mind.play.ui.settings.SettingsScreen
@@ -101,7 +102,27 @@ fun MindPlayNavigation() {
             }
             
             composable(Screen.Games.route) {
-                GamesScreen()
+                GamesScreen(
+                    onNavigateToGame = { gameId ->
+                        when (gameId) {
+                            "arytmetyka" -> navController.navigate(Screen.GameArytmetyka.route)
+                            "memory" -> navController.navigate(Screen.GameMemory.route)
+                            "pary" -> navController.navigate(Screen.GamePary.route)
+                            "puzzle" -> navController.navigate(Screen.GamePuzzle.route)
+                            "uwaga" -> navController.navigate(Screen.GameUwaga.route)
+                            "simon" -> navController.navigate(Screen.GameSimon.route)
+                        }
+                    }
+                )
+            }
+            
+            composable(Screen.GameArytmetyka.route) {
+                ArithmeticGameScreen(
+                    onBack = { navController.popBackStack() },
+                    onFinish = { score, totalTasks ->
+                        navController.popBackStack()
+                    }
+                )
             }
             
             composable(Screen.Settings.route) {

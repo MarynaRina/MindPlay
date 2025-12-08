@@ -39,7 +39,9 @@ private val games = listOf(
 )
 
 @Composable
-fun GamesScreen() {
+fun GamesScreen(
+    onNavigateToGame: (String) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -71,7 +73,7 @@ fun GamesScreen() {
             items(games) { game ->
                 GameCard(
                     game = game,
-                    onClick = { }
+                    onClick = { onNavigateToGame(game.id) }
                 )
             }
         }
