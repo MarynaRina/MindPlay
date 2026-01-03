@@ -62,11 +62,11 @@ fun ArithmeticGameScreen(
                 isSuccess = isSuccess,
                 score = gameState.score,
                 totalTasks = gameState.totalTasks,
-                timeTaken = timeTaken,
                 onPlayAgain = {
                     viewModel.startGame()
                 },
-                onBack = onBack
+                onBack = onBack,
+                timeTaken = timeTaken
             )
         }
         else -> {

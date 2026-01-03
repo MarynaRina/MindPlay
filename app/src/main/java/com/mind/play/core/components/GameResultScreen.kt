@@ -21,15 +21,29 @@ import androidx.compose.ui.unit.dp
 import com.mind.play.ui.theme.MindPlayTheme
 
 
+data class GameResultMetric(
+    val label: String,
+    val value: String
+)
+
 @Composable
 fun GameResultScreen(
     isSuccess: Boolean,
     score: Int,
     totalTasks: Int,
-    timeTaken: String? = null,
     onPlayAgain: () -> Unit,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    timeTaken: String? = null,
+    successTitle: String = "Brawo! 🎉\nUdało Ci się\nukończyć grę!",
+    failureTitle: String = "Spróbuj\njeszcze raz",
+    successMessage: String = "Świetna robota! 🙌 Oto Twój wynik:",
+    failureMessage: String = "Nie udało się tym razem, ale możesz spróbować ponownie. Każda próba to ćwiczenie i postęp.",
+    playAgainButtonText: String = "GRAJ DALEJ",
+    backButtonText: String = "POWRÓT",
+    customMetrics: List<GameResultMetric>? = null,
+    scoreLabel: String = "Poprawne odpowiedzi:",
+    timeLabel: String = "Czas:"
 ) {
     Box(
         modifier = modifier
@@ -45,11 +59,7 @@ fun GameResultScreen(
             verticalArrangement = Arrangement.Top
         ) {
             Text(
-                text = if (isSuccess) {
-                    "Brawo! 🎉\nUdało Ci się\nukończyć grę!"
-                } else {
-                    "Spróbuj\njeszcze raz"
-                },
+                text = if (isSuccess) successTitle else failureTitle,
                 style = MaterialTheme.typography.displayLarge,
                 color = MindPlayTheme.colors.textHeading
             )
@@ -67,22 +77,31 @@ fun GameResultScreen(
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
-                            text = "Świetna robota! 🙌 Oto Twój wynik:",
+                            text = successMessage,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MindPlayTheme.colors.textHeading
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        timeTaken?.let {
-                            ResultItem(label = "Czas:", value = it)
-                            Spacer(modifier = Modifier.height(8.dp))
+                        if (customMetrics != null) {
+                            customMetrics.forEachIndexed { index, metric ->
+                                ResultItem(label = metric.label, value = metric.value)
+                                if (index < customMetrics.size - 1) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+                            }
+                        } else {
+                            timeTaken?.let {
+                                ResultItem(label = timeLabel, value = it)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+
+                            ResultItem(
+                                label = scoreLabel,
+                                value = "$score/$totalTasks"
+                            )
                         }
-                        
-                        ResultItem(
-                            label = "Poprawne odpowiedzi:",
-                            value = "$score/$totalTasks"
-                        )
                     }
                 }
             } else {
@@ -90,7 +109,7 @@ fun GameResultScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Nie udało się tym razem, ale możesz spróbować ponownie. Każda próba to ćwiczenie i postęp.",
+                        text = failureMessage,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MindPlayTheme.colors.textSecondary
                     )
@@ -100,14 +119,14 @@ fun GameResultScreen(
             Spacer(modifier = Modifier.weight(1f))
             
             PrimaryButton(
-                text = "GRAJ DALEJ",
+                text = playAgainButtonText,
                 onClick = onPlayAgain
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
             SecondaryButton(
-                text = "POWRÓT",
+                text = backButtonText,
                 onClick = onBack
             )
         }
