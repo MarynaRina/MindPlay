@@ -10,6 +10,7 @@ import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.domain.repository.ProgressRepository
 import com.mind.play.ui.dashboard.DashboardViewModel
 import com.mind.play.ui.games.arithmetic.ArithmeticViewModel
+import com.mind.play.ui.games.puzzle.PuzzleViewModel
 import com.mind.play.ui.onboarding.OnboardingViewModel
 import com.mind.play.ui.settings.SettingsViewModel
 import org.koin.android.ext.koin.androidContext
@@ -38,6 +39,7 @@ val appModule = module {
     viewModel { DashboardViewModel(get()) }
     viewModel { SettingsViewModel(get()) }
     viewModel { ArithmeticViewModel(get(), get()) }
+    viewModel { PuzzleViewModel(get(), get()) }
 }
 
 val allModules = listOf(

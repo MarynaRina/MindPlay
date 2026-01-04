@@ -15,6 +15,7 @@ import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.ui.dashboard.HomeScreen
 import com.mind.play.ui.games.GamesScreen
 import com.mind.play.ui.games.arithmetic.ArithmeticGameScreen
+import com.mind.play.ui.games.puzzle.PuzzleGameScreen
 import com.mind.play.ui.onboarding.OnboardingScreen
 import com.mind.play.ui.onboarding.WelcomeScreen
 import com.mind.play.ui.settings.SettingsScreen
@@ -122,6 +123,12 @@ fun MindPlayNavigation() {
                     onFinish = { score, totalTasks ->
                         navController.popBackStack()
                     }
+                )
+            }
+
+            composable(Screen.GamePuzzle.route) {
+                PuzzleGameScreen(
+                    onBack = { navController.popBackStack() }
                 )
             }
             
