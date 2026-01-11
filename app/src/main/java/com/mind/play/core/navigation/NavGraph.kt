@@ -14,6 +14,7 @@ import com.mind.play.core.components.MindPlayBottomNavigation
 import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.ui.dashboard.HomeScreen
 import com.mind.play.ui.games.GamesScreen
+import com.mind.play.ui.games.memory.MemoryScreen
 import com.mind.play.ui.onboarding.OnboardingScreen
 import com.mind.play.ui.onboarding.WelcomeScreen
 import com.mind.play.ui.settings.SettingsScreen
@@ -101,11 +102,31 @@ fun MindPlayNavigation() {
             }
             
             composable(Screen.Games.route) {
-                GamesScreen()
+                GamesScreen(
+                    onGameClick = { route ->
+                        navController.navigate(route)
+                    }
+                )
             }
             
             composable(Screen.Settings.route) {
                 SettingsScreen()
+            }
+            
+            // Game: Memory
+            composable(
+                route = Screen.GameMemory.route,
+                enterTransition = { NavigationAnimations.slideInFromRightTransition() },
+                exitTransition = { NavigationAnimations.slideOutToLeftTransition() },
+                popEnterTransition = { NavigationAnimations.slideInFromLeftTransition() },
+                popExitTransition = { NavigationAnimations.slideOutToRightTransition() }
+            ) {
+                MemoryScreen(
+                    onBack = { navController.popBackStack() },
+                    onFinish = { score -> 
+                        // Score saved in ViewModel
+                    }
+                )
             }
         }
     }

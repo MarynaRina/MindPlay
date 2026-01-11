@@ -21,25 +21,29 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.mind.play.R
 import com.mind.play.core.components.AnimatedCard
+import com.mind.play.core.navigation.Screen
 import com.mind.play.ui.theme.MindPlayTheme
 
 data class Game(
     val id: String,
     val name: String,
-    val drawableRes: Int
+    val drawableRes: Int,
+    val route: String
 )
 
 private val games = listOf(
-    Game("arytmetyka", "Arytmetyka", R.drawable.card_aritmetic),
-    Game("memory", "Memory", R.drawable.card_memory),
-    Game("pary", "Pary/Różnice", R.drawable.card_pairs),
-    Game("puzzle", "Puzzle", R.drawable.card_puzzle),
-    Game("uwaga", "Uwaga/Reakcja", R.drawable.card_reaction),
-    Game("simon", "Simon", R.drawable.card_simon)
+    Game("arytmetyka", "Arytmetyka", R.drawable.card_aritmetic, Screen.GameArytmetyka.route),
+    Game("memory", "Memory", R.drawable.card_memory, Screen.GameMemory.route),
+    Game("pary", "Pary/Różnice", R.drawable.card_pairs, Screen.GamePary.route),
+    Game("puzzle", "Puzzle", R.drawable.card_puzzle, Screen.GamePuzzle.route),
+    Game("uwaga", "Uwaga/Reakcja", R.drawable.card_reaction, Screen.GameUwaga.route),
+    Game("simon", "Simon", R.drawable.card_simon, Screen.GameSimon.route)
 )
 
 @Composable
-fun GamesScreen() {
+fun GamesScreen(
+    onGameClick: (String) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -71,7 +75,7 @@ fun GamesScreen() {
             items(games) { game ->
                 GameCard(
                     game = game,
-                    onClick = { }
+                    onClick = { onGameClick(game.route) }
                 )
             }
         }
