@@ -15,6 +15,8 @@ import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.ui.dashboard.HomeScreen
 import com.mind.play.ui.games.GamesScreen
 import com.mind.play.ui.games.arithmetic.ArithmeticGameScreen
+import com.mind.play.ui.games.simon.SimonGameScreen
+import com.mind.play.ui.games.uwaga.UwagaGameScreen
 import com.mind.play.ui.onboarding.OnboardingScreen
 import com.mind.play.ui.onboarding.WelcomeScreen
 import com.mind.play.ui.settings.SettingsScreen
@@ -116,8 +118,44 @@ fun MindPlayNavigation() {
                 )
             }
             
-            composable(Screen.GameArytmetyka.route) {
+            composable(
+                route = Screen.GameArytmetyka.route,
+                enterTransition = { NavigationAnimations.slideInFromRightTransition() },
+                exitTransition = { NavigationAnimations.slideOutToLeftTransition() },
+                popEnterTransition = { NavigationAnimations.slideInFromLeftTransition() },
+                popExitTransition = { NavigationAnimations.slideOutToRightTransition() }
+            ) {
                 ArithmeticGameScreen(
+                    onBack = { navController.popBackStack() },
+                    onFinish = { score, totalTasks ->
+                        navController.popBackStack()
+                    }
+                )
+            }
+            
+            composable(
+                route = Screen.GameSimon.route,
+                enterTransition = { NavigationAnimations.slideInFromRightTransition() },
+                exitTransition = { NavigationAnimations.slideOutToLeftTransition() },
+                popEnterTransition = { NavigationAnimations.slideInFromLeftTransition() },
+                popExitTransition = { NavigationAnimations.slideOutToRightTransition() }
+            ) {
+                SimonGameScreen(
+                    onBack = { navController.popBackStack() },
+                    onFinish = { score ->
+                        navController.popBackStack()
+                    }
+                )
+            }
+            
+            composable(
+                route = Screen.GameUwaga.route,
+                enterTransition = { NavigationAnimations.slideInFromRightTransition() },
+                exitTransition = { NavigationAnimations.slideOutToLeftTransition() },
+                popEnterTransition = { NavigationAnimations.slideInFromLeftTransition() },
+                popExitTransition = { NavigationAnimations.slideOutToRightTransition() }
+            ) {
+                UwagaGameScreen(
                     onBack = { navController.popBackStack() },
                     onFinish = { score, totalTasks ->
                         navController.popBackStack()
