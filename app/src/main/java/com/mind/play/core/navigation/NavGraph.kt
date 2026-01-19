@@ -15,6 +15,7 @@ import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.ui.dashboard.HomeScreen
 import com.mind.play.ui.games.GamesScreen
 import com.mind.play.ui.games.arithmetic.ArithmeticGameScreen
+import com.mind.play.ui.games.memory.MemoryScreen
 import com.mind.play.ui.games.simon.SimonGameScreen
 import com.mind.play.ui.games.uwaga.UwagaGameScreen
 import com.mind.play.ui.onboarding.OnboardingScreen
@@ -165,6 +166,22 @@ fun MindPlayNavigation() {
             
             composable(Screen.Settings.route) {
                 SettingsScreen()
+            }
+            
+            // Game: Memory
+            composable(
+                route = Screen.GameMemory.route,
+                enterTransition = { NavigationAnimations.slideInFromRightTransition() },
+                exitTransition = { NavigationAnimations.slideOutToLeftTransition() },
+                popEnterTransition = { NavigationAnimations.slideInFromLeftTransition() },
+                popExitTransition = { NavigationAnimations.slideOutToRightTransition() }
+            ) {
+                MemoryScreen(
+                    onBack = { navController.popBackStack() },
+                    onFinish = { score -> 
+                        // Score saved in ViewModel
+                    }
+                )
             }
         }
     }
