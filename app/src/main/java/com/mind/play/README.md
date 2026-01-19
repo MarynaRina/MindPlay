@@ -163,17 +163,122 @@ data class AppSettings(
 - Автоматично читає налаштування з SettingsRepository
 - Застосовує MindPlayTheme з highContrast і textSize
 
-### 👤 ОСОБА 3 (Звук + Сповіщення)
+### 👤 ОСОБА 3 (Звук + Сповіщення) - ✅ РЕАЛІЗОВАНО
 
-#### Де додати ініціалізацію
-- Файл: `MindPlayApp.kt`
-- В методі `onCreate()` додати:
-  - NotificationChannel
-  - SoundManager
+#### Звуки (core/sound/)
 
-#### Налаштування звуку
-- `AppSettings.uiSoundEnabled` - звуки інтерфейсу
-- `AppSettings.gameSoundEnabled` - звуки ігор
+##### SoundManager.kt
+**Менеджер звуків з підтримкою SoundPool та MediaPlayer**
+
+```kotlin
+// Ін'єкція через Koin
+val soundManager: SoundManager by inject()
+
+// Короткі звуки (SoundPool)
+soundManager.playTap()      // звук натискання (UI)
+soundManager.playCorrect()  // звук правильної відповіді (Game)
+soundManager.playWrong()    // звук неправильної відповіді (Game)
+
+// Тони Simon (MediaPlayer)
+soundManager.playSimonTone(SoundManager.SimonTone.GREEN)
+soundManager.playSimonTone(SoundManager.SimonTone.ORANGE)
+soundManager.playSimonTone(SoundManager.SimonTone.PINK)
+soundManager.playSimonTone(SoundManager.SimonTone.YELLOW)
+soundManager.stopSimonTone() // зупинити поточний тон
+```
+
+Особливості:
+- Автоматично читає налаштування з SettingsRepository
+- `uiSoundEnabled` - контролює playTap()
+- `gameSoundEnabled` - контролює playCorrect(), playWrong(), playSimonTone()
+- Безпечно обробляє відсутні звукові файли
+
+##### Звукові файли (res/raw/)
+Потрібно додати наступні файли:
+- `tap.mp3` - звук натискання
+- `correct.mp3` - правильна відповідь
+- `wrong.mp3` - неправильна відповідь
+- `simon_green.mp3`, `simon_orange.mp3`, `simon_pink.mp3`, `simon_yellow.mp3` - тони Simon
+
+#### Локальні сповіщення (core/notifications/)
+
+##### NotificationScheduler.kt
+**Планування щоденних нагадувань**
+
+```kotlin
+val notificationScheduler: NotificationScheduler by inject()
+
+// Створити канал (викликається в MindPlayApp.onCreate())
+notificationScheduler.createNotificationChannel()
+
+// Планувати щоденне нагадування о 10:00
+notificationScheduler.scheduleDailyReminder()
+
+// Скасувати нагадування
+notificationScheduler.cancelDailyReminder()
+
+// Показати сповіщення вручну
+notificationScheduler.showNotification(
+    title = "Час для вправ!",
+    message = "Твій мозок чекає на тренування"
+)
+
+// Перевірити дозвіл на точні будильники (Android 12+)
+notificationScheduler.canScheduleExactAlarms()
+```
+
+##### ReminderReceiver.kt
+BroadcastReceiver для отримання alarm і показу сповіщення
+
+##### BootReceiver.kt
+Відновлює заплановані нагадування після перезавантаження пристрою
+
+#### Налаштування в UI (SettingsScreen.kt)
+
+Додано нові секції:
+- **Dźwięki** (Звуки)
+  - Dźwięki interfejsu (on/off) - звуки UI
+  - Dźwięki gier (on/off) - звуки ігор
+- **Przypomnienia** (Нагадування)
+  - Codzienne powiadomienia o 10:00 (on/off)
+
+#### AndroidManifest.xml - додані permissions
+```xml
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+<uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+```
+
+#### Koin DI
+```kotlin
+// В AppModule.kt
+single { SoundManager(androidContext(), get()) }
+single { NotificationScheduler(androidContext()) }
+```
+
+#### Використання в іграх
+```kotlin
+@Composable
+fun GameScreen() {
+    val context = LocalContext.current
+    val soundManager = remember { 
+        (context.applicationContext as MindPlayApp).soundManager 
+    }
+    
+    // Або через Koin
+    val soundManager: SoundManager = get()
+    
+    // При правильній відповіді
+    soundManager.playCorrect()
+    
+    // При неправильній відповіді
+    soundManager.playWrong()
+    
+    // У грі Simon
+    soundManager.playSimonTone(SoundManager.SimonTone.GREEN)
+}
+```
 
 ### 👤 ОСОБИ 4-7 (Ігри)
 
@@ -341,9 +446,15 @@ com.mind.play/
 │   │   └── Toggle.kt
 │   ├── di/
 │   │   └── AppModule.kt
-│   └── navigation/
-│       ├── NavGraph.kt
-│       └── Screen.kt
+│   ├── navigation/
+│   │   ├── NavGraph.kt
+│   │   └── Screen.kt
+│   ├── notifications/
+│   │   ├── NotificationScheduler.kt
+│   │   ├── ReminderReceiver.kt
+│   │   └── BootReceiver.kt
+│   └── sound/
+│       └── SoundManager.kt
 ├── data/
 │   ├── datastore/
 │   └── repository/
@@ -360,7 +471,8 @@ com.mind.play/
     ├── onboarding/
     │   └── WelcomeScreen.kt
     ├── settings/
-    │   └── SettingsScreen.kt
+    │   ├── SettingsScreen.kt
+    │   └── SettingsViewModel.kt
     ├── splash/
     │   └── SplashScreen.kt
     └── theme/

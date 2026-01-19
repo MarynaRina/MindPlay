@@ -3,6 +3,8 @@ package com.mind.play.core.di
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
+import com.mind.play.core.notifications.NotificationScheduler
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.data.database.AppDatabase
 import com.mind.play.data.datastore.settingsDataStore
 import com.mind.play.data.repository.ProgressRepositoryImpl
@@ -38,9 +40,15 @@ val appModule = module {
     single { SettingsRepository(get()) }
     single<ProgressRepository> { ProgressRepositoryImpl(get(), get()) }
     
+    // Sound Manager (singleton)
+    single { SoundManager(androidContext(), get()) }
+
+    // Notification Scheduler
+    single { NotificationScheduler(androidContext()) }
+
     viewModel { OnboardingViewModel(get()) }
     viewModel { DashboardViewModel(get()) }
-    viewModel { SettingsViewModel(get()) }
+    viewModel { SettingsViewModel(get<SettingsRepository>(), get<NotificationScheduler>()) }
     viewModel { ArithmeticViewModel(get(), get()) }
     viewModel { MemoryViewModel(get(), get()) }
     viewModel { PuzzleViewModel(get(), get()) }
