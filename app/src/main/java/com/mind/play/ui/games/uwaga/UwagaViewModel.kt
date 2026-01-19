@@ -2,6 +2,7 @@ package com.mind.play.ui.games.uwaga
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.domain.models.GameResult
 import com.mind.play.domain.repository.ProgressRepository
@@ -37,7 +38,8 @@ data class UwagaGameState(
 
 class UwagaViewModel(
     private val settingsRepository: SettingsRepository,
-    private val progressRepository: ProgressRepository
+    private val progressRepository: ProgressRepository,
+    private val soundManager: SoundManager
 ) : ViewModel() {
     
     private val _gameState = MutableStateFlow(UwagaGameState())
@@ -48,7 +50,7 @@ class UwagaViewModel(
     private var gameStartTimeMillis: Long = 0L
     
     companion object {
-        const val GRID_SIZE = 15 // 3x5 grid
+        const val GRID_SIZE = 15
     }
     
     fun startGame() {
@@ -62,8 +64,7 @@ class UwagaViewModel(
                 timeLeftSeconds = 60,
                 gameStartTimeMillis = gameStartTimeMillis
             )
-            
-            // Timer only in stress mode (when stressMode toggle is OFF)
+
             if (!_gameState.value.stressMode) {
                 startTimer()
             }
@@ -75,7 +76,6 @@ class UwagaViewModel(
     private fun activateRandomBlock() {
         activationJob?.cancel()
         activationJob = viewModelScope.launch {
-            // Random delay before showing active block (500ms - 2000ms)
             val delayTime = Random.nextLong(500, 2000)
             delay(delayTime)
             
@@ -92,7 +92,13 @@ class UwagaViewModel(
                 lastTapWasWrong = false,
                 wrongTapIndex = null
             )
-        }
+            viewModelScope.launch {
+                delay(1000)
+                if (_gameState.value.activeBlockIndex == newIndex) {
+                    _gameState.value = _gameState.value.copy(activeBlockIndex = null)
+                    activateRandomBlock()
+                }
+            }        }
     }
     
     fun onBlockTapped(index: Int) {
@@ -103,7 +109,8 @@ class UwagaViewModel(
         }
         
         if (index == _gameState.value.activeBlockIndex) {
-            // Correct tap
+            soundManager.playCorrect()
+            
             val newCorrectCount = _gameState.value.correctCount + 1
             
             _gameState.value = _gameState.value.copy(
@@ -119,15 +126,15 @@ class UwagaViewModel(
                 activateRandomBlock()
             }
         } else {
-            // Wrong tap
+            soundManager.playWrong()
+            
             _gameState.value = _gameState.value.copy(
                 lastTapWasWrong = true,
                 wrongTapIndex = index
             )
-            
-            // Clear wrong tap indicator after short delay
+
             viewModelScope.launch {
-                delay(300)
+                delay(600)
                 _gameState.value = _gameState.value.copy(
                     lastTapWasWrong = false,
                     wrongTapIndex = null
@@ -158,7 +165,7 @@ class UwagaViewModel(
         if (_gameState.value.phase == UwagaGamePhase.PLAYING) {
             _gameState.value = _gameState.value.copy(
                 isPaused = true,
-                activeBlockIndex = null // Hide active block during pause
+                activeBlockIndex = null
             )
             activationJob?.cancel()
         }

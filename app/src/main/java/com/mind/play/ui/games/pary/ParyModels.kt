@@ -1,24 +1,29 @@
-package com.mind.play.ui.games.memory
+package com.mind.play.ui.games.pary
 
 import com.mind.play.R
 
-enum class MemoryGridMode(val columns: Int, val rows: Int) {
+enum class ParyGridMode(val columns: Int, val rows: Int) {
     GRID_2X4(columns = 2, rows = 4),
     GRID_3X4(columns = 3, rows = 4);
 
     val totalCards: Int get() = columns * rows
-    val pairs: Int get() = totalCards / 2
 }
 
-data class MemoryCard(
+enum class ParyTaskType {
+    FIND_DIFFERENT,
+
+    FIND_PAIR
+}
+
+data class ParyCard(
     val id: Int,
-    val iconType: MemoryIconType,
-    val isFlipped: Boolean = false,
-    val isMatched: Boolean = false,
-    val isMismatched: Boolean = false
+    val iconType: ParyIconType,
+    val isSelected: Boolean = false,
+    val isCorrect: Boolean = false,
+    val isWrong: Boolean = false
 )
 
-enum class MemoryIconType(val iconRes: Int) {
+enum class ParyIconType(val iconRes: Int) {
     STAR(R.drawable.ic_memory_star),
     THUMBSUP(R.drawable.ic_memory_thumbsup),
     CLOVER(R.drawable.ic_memory_clover),
@@ -33,21 +38,23 @@ enum class MemoryIconType(val iconRes: Int) {
     LIGHTNING(R.drawable.ic_memory_lightning)
 }
 
-data class MemoryGameState(
-    val cards: List<MemoryCard> = emptyList(),
+data class ParyGameState(
+    val cards: List<ParyCard> = emptyList(),
     val currentRound: Int = 1,
     val totalRounds: Int = 10,
 
-    val gridMode: MemoryGridMode = MemoryGridMode.GRID_2X4,
+    val taskType: ParyTaskType = ParyTaskType.FIND_DIFFERENT,
 
-    val matchedPairs: Int = 0,
+    val gridMode: ParyGridMode = ParyGridMode.GRID_2X4,
 
-    val totalPairs: Int = MemoryGridMode.GRID_2X4.pairs,
+    val differentCardIndex: Int? = null,
 
-    val firstSelectedCard: Int? = null,
-    val secondSelectedCard: Int? = null,
+    val pairCardIndices: Pair<Int, Int>? = null,
+
+    val firstSelectedIndex: Int? = null,
+
     val isProcessing: Boolean = false,
-    val gamePhase: MemoryGamePhase = MemoryGamePhase.INTRO,
+    val gamePhase: ParyGamePhase = ParyGamePhase.INTRO,
 
     val timeRemainingSeconds: Int = 60,
     val isStressMode: Boolean = false,
@@ -58,10 +65,9 @@ data class MemoryGameState(
     val isTimeUp: Boolean = false
 )
 
-enum class MemoryGamePhase {
+enum class ParyGamePhase {
     INTRO,
     PLAYING,
     PAUSED,
-    ROUND_COMPLETE,
     FINISHED
 }

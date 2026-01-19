@@ -26,12 +26,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mind.play.core.components.MindPlayToggle
 import com.mind.play.core.components.PrimaryButton
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.ui.theme.MindPlayTheme
+import org.koin.compose.koinInject
 
 @Composable
 fun PuzzleIntroScreen(
     onStartGame: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    soundManager: SoundManager = koinInject()
 ) {
     var isHardMode by remember { mutableStateOf(false) }
 
@@ -102,6 +105,7 @@ fun PuzzleIntroScreen(
             PrimaryButton(
                 text = "ZACZYNAMY",
                 onClick = {
+                    soundManager.playTap()
                     onStartGame(if (isHardMode) 4 else 3)
                 }
             )

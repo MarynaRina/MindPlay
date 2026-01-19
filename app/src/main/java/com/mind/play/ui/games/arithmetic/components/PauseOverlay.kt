@@ -21,12 +21,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.mind.play.R
 import com.mind.play.core.components.PrimaryButton
+import com.mind.play.core.sound.SoundManager
+import org.koin.compose.koinInject
 
 @Composable
 fun PauseOverlay(
     onResume: () -> Unit,
     onQuit: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    soundManager: SoundManager = koinInject()
 ) {
     Box(
         modifier = modifier
@@ -35,7 +38,10 @@ fun PauseOverlay(
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
-            ) { onResume() }
+            ) {
+                soundManager.playTap()
+                onResume()
+            }
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -51,7 +57,10 @@ fun PauseOverlay(
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
-                    ) { onResume() }
+                    ) {
+                        soundManager.playTap()
+                        onResume()
+                    }
             )
         }
         
@@ -63,7 +72,10 @@ fun PauseOverlay(
         ) {
             PrimaryButton(
                 text = "GRAJ DALEJ",
-                onClick = onResume,
+                onClick = {
+                    soundManager.playTap()
+                    onResume()
+                },
                 modifier = Modifier
             )
         }

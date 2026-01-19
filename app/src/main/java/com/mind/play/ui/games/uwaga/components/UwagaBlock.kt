@@ -30,7 +30,7 @@ fun UwagaBlock(
 ) {
     val inactiveColor = Color.White
     val activeColor = SimonYellow
-    val wrongColor = Color(0xFFFFAAAA) // Light red for wrong tap feedback
+    val wrongColor = Color(0xFFFFAAAA)
     
     var isPressed by remember { mutableStateOf(false) }
     
@@ -43,8 +43,7 @@ fun UwagaBlock(
         animationSpec = tween(durationMillis = 200),
         label = "blockColor"
     )
-    
-    // Press animation - scale down when pressed
+
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.92f else 1f,
         animationSpec = spring(
@@ -53,8 +52,7 @@ fun UwagaBlock(
         ),
         label = "pressScale"
     )
-    
-    // Highlight pulse animation for active block
+
     val activeScale by animateFloatAsState(
         targetValue = if (isActive) 1.05f else 1f,
         animationSpec = spring(

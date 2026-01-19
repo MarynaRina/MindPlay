@@ -13,6 +13,7 @@ import com.mind.play.domain.repository.ProgressRepository
 import com.mind.play.ui.dashboard.DashboardViewModel
 import com.mind.play.ui.games.arithmetic.ArithmeticViewModel
 import com.mind.play.ui.games.memory.MemoryViewModel
+import com.mind.play.ui.games.pary.ParyViewModel
 import com.mind.play.ui.games.puzzle.PuzzleViewModel
 import com.mind.play.ui.games.simon.SimonViewModel
 import com.mind.play.ui.games.uwaga.UwagaViewModel
@@ -39,21 +40,20 @@ val appModule = module {
     
     single { SettingsRepository(get()) }
     single<ProgressRepository> { ProgressRepositoryImpl(get(), get()) }
-    
-    // Sound Manager (singleton)
+
     single { SoundManager(androidContext(), get()) }
 
-    // Notification Scheduler
     single { NotificationScheduler(androidContext()) }
 
     viewModel { OnboardingViewModel(get()) }
     viewModel { DashboardViewModel(get()) }
     viewModel { SettingsViewModel(get<SettingsRepository>(), get<NotificationScheduler>()) }
-    viewModel { ArithmeticViewModel(get(), get()) }
-    viewModel { MemoryViewModel(get(), get()) }
-    viewModel { PuzzleViewModel(get(), get()) }
-    viewModel { SimonViewModel(get()) }
-    viewModel { UwagaViewModel(get(), get()) }
+    viewModel { ArithmeticViewModel(get(), get(), get()) }
+    viewModel { MemoryViewModel(get(), get(), get()) }
+    viewModel { ParyViewModel(get(), get(), get()) }
+    viewModel { PuzzleViewModel(get(), get(), get()) }
+    viewModel { SimonViewModel(get(), get()) }
+    viewModel { UwagaViewModel(get(), get(), get()) }
 }
 
 val allModules = listOf(

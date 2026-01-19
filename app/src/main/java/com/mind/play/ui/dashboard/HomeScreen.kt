@@ -276,7 +276,6 @@ fun HomeScreen(
             
             Box(
                 modifier = Modifier
-                    .padding(horizontal = 4.dp)
                     .width(if (currentWeekIndex == 1) 20.dp else 8.dp)
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp))

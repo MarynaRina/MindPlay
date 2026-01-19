@@ -11,21 +11,18 @@ import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 
 class MindPlayApp : Application() {
-    
-    // Lazy injection of SoundManager (singleton)
+
     val soundManager: SoundManager by inject()
 
     override fun onCreate() {
         super.onCreate()
-        
-        // Initialize Koin DI
+
         startKoin {
             androidLogger(Level.ERROR)
             androidContext(this@MindPlayApp)
             modules(allModules)
         }
 
-        // Initialize Notification Channel
         initNotificationChannel()
     }
 
@@ -36,7 +33,6 @@ class MindPlayApp : Application() {
 
     override fun onTerminate() {
         super.onTerminate()
-        // Release sound resources
         soundManager.release()
     }
 }

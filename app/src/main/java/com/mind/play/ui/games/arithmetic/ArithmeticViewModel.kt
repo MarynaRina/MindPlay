@@ -2,6 +2,7 @@ package com.mind.play.ui.games.arithmetic
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.domain.models.ArithmeticGameState
 import com.mind.play.domain.models.ArithmeticTask
@@ -19,7 +20,8 @@ import kotlin.random.Random
 
 class ArithmeticViewModel(
     private val settingsRepository: SettingsRepository,
-    private val progressRepository: ProgressRepository
+    private val progressRepository: ProgressRepository,
+    private val soundManager: SoundManager
 ) : ViewModel() {
     
     private val _gameState = MutableStateFlow(ArithmeticGameState())
@@ -150,6 +152,12 @@ class ArithmeticViewModel(
             isCorrect = isCorrect,
             score = if (isCorrect) _gameState.value.score + 1 else _gameState.value.score
         )
+        
+        if (isCorrect) {
+            soundManager.playCorrect()
+        } else {
+            soundManager.playWrong()
+        }
         
         viewModelScope.launch {
             delay(1000)

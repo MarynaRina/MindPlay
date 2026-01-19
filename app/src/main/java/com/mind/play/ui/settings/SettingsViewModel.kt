@@ -81,7 +81,6 @@ class SettingsViewModel(
         viewModelScope.launch {
             settingsRepository.updateNotifications(enabled)
 
-            // Планувати або скасовувати нагадування
             if (enabled) {
                 notificationScheduler.scheduleDailyReminder()
             } else {

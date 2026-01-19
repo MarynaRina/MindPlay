@@ -18,15 +18,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.ui.theme.InactiveGray
 import com.mind.play.ui.theme.MindPlayTheme
+import org.koin.compose.koinInject
 
 @Composable
 fun MindPlayRadioButton(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    soundManager: SoundManager = koinInject()
 ) {
     Row(
         modifier = modifier
@@ -44,7 +47,10 @@ fun MindPlayRadioButton(
                     color = InactiveGray,
                     shape = CircleShape
                 )
-                .clickable(onClick = onClick)
+                .clickable(onClick = {
+                    soundManager.playTap()
+                    onClick()
+                })
                 .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -64,7 +70,10 @@ fun MindPlayRadioButton(
                 fontWeight = FontWeight.Normal
             ),
             color = MindPlayTheme.colors.textPrimary,
-            modifier = Modifier.clickable(onClick = onClick)
+            modifier = Modifier.clickable(onClick = {
+                soundManager.playTap()
+                onClick()
+            })
         )
     }
 }

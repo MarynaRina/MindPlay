@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.mind.play.ui.games.simon.SimonColor
+import com.mind.play.ui.theme.ErrorRed
 import com.mind.play.ui.theme.SimonGreen
 import com.mind.play.ui.theme.SimonOrange
 import com.mind.play.ui.theme.SimonPink
@@ -29,6 +30,7 @@ import com.mind.play.ui.theme.SimonYellow
 fun SimonBlock(
     color: SimonColor,
     isHighlighted: Boolean,
+    isWrong: Boolean = false,
     isInteractive: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -45,12 +47,15 @@ fun SimonBlock(
     var isPressed by remember { mutableStateOf(false) }
     
     val backgroundColor by animateColorAsState(
-        targetValue = if (isHighlighted) activeColor else inactiveColor,
+        targetValue = when {
+            isWrong -> ErrorRed
+            isHighlighted -> activeColor
+            else -> inactiveColor
+        },
         animationSpec = tween(durationMillis = 200),
         label = "blockColor"
     )
-    
-    // Press animation - scale down when pressed
+
     val pressScale by animateFloatAsState(
         targetValue = if (isPressed) 0.92f else 1f,
         animationSpec = spring(
@@ -59,8 +64,7 @@ fun SimonBlock(
         ),
         label = "pressScale"
     )
-    
-    // Highlight pulse animation
+
     val highlightScale by animateFloatAsState(
         targetValue = if (isHighlighted) 1.08f else 1f,
         animationSpec = spring(

@@ -29,7 +29,7 @@ data class ArithmeticGameState(
     val isPaused: Boolean = false,
     val isFinished: Boolean = false,
     val stressMode: Boolean = false,
-    val timeLeftSeconds: Int = 120, // 2 minutes for stress mode
+    val timeLeftSeconds: Int = 120,
     val startTimeMillis: Long = 0L
 ) {
     val progress: Float

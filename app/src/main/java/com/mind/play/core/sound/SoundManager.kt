@@ -4,7 +4,6 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.SoundPool
-import android.util.Log
 import com.mind.play.data.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,25 +11,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-/**
- * Менеджер звуків для MindPlay
- *
- * Підтримує:
- * - Короткі звуки (SoundPool): tap, correct, wrong
- * - Тони Simon (MediaPlayer): simon_green, simon_orange, simon_pink, simon_yellow
- *
- * Читає налаштування з SettingsRepository:
- * - uiSoundEnabled - звуки інтерфейсу (tap)
- * - gameSoundEnabled - звуки ігор (correct, wrong, simon tones)
- */
 class SoundManager(
     private val context: Context,
     private val settingsRepository: SettingsRepository
 ) {
-
-    companion object {
-        private const val TAG = "SoundManager"
-    }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -39,19 +23,19 @@ class SoundManager(
 
     private var soundPool: SoundPool? = null
     private var mediaPlayer: MediaPlayer? = null
+    private var backgroundMusicPlayer: MediaPlayer? = null
     private var isInitialized = false
+    private var isMusicStarted = false
 
-    // Sound IDs for SoundPool
     private var soundTap: Int = 0
     private var soundCorrect: Int = 0
     private var soundWrong: Int = 0
 
-    // Simon tone resource IDs (will be loaded dynamically)
     private val simonToneResources = mapOf(
-        SimonTone.GREEN to "simon_green",
-        SimonTone.ORANGE to "simon_orange",
-        SimonTone.PINK to "simon_pink",
-        SimonTone.YELLOW to "simon_yellow"
+        SimonTone.GREEN to "simon_first",
+        SimonTone.ORANGE to "simon_second",
+        SimonTone.PINK to "simon_third",
+        SimonTone.YELLOW to "simon_forth"
     )
 
     init {
@@ -79,7 +63,6 @@ class SoundManager(
 
             isInitialized = true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize SoundPool", e)
         }
     }
 
@@ -89,11 +72,9 @@ class SoundManager(
             if (resId != 0) {
                 pool.load(context, resId, 1)
             } else {
-                Log.w(TAG, "Sound resource not found: $name")
                 0
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to load sound: $name", e)
             0
         }
     }
@@ -102,53 +83,44 @@ class SoundManager(
         scope.launch {
             settingsRepository.settings.collectLatest { settings ->
                 settings?.let {
+                    val wasUiSoundEnabled = uiSoundEnabled
                     uiSoundEnabled = it.uiSoundEnabled
                     gameSoundEnabled = it.gameSoundEnabled
+
+                    if (uiSoundEnabled && !wasUiSoundEnabled) {
+                        resumeBackgroundMusic()
+                    } else if (!uiSoundEnabled && wasUiSoundEnabled) {
+                        pauseBackgroundMusic()
+                    }
                 }
             }
         }
     }
 
-    /**
-     * Відтворює звук натискання (UI)
-     */
     fun playTap() {
         if (!uiSoundEnabled) return
         soundPool?.play(soundTap, 1f, 1f, 1, 0, 1f)
     }
-
-    /**
-     * Відтворює звук правильної відповіді (Game)
-     */
     fun playCorrect() {
         if (!gameSoundEnabled) return
         soundPool?.play(soundCorrect, 1f, 1f, 1, 0, 1f)
     }
 
-    /**
-     * Відтворює звук неправильної відповіді (Game)
-     */
     fun playWrong() {
         if (!gameSoundEnabled) return
         soundPool?.play(soundWrong, 1f, 1f, 1, 0, 1f)
     }
 
-    /**
-     * Відтворює тон Simon (Game)
-     * @param tone - колір тону (GREEN, ORANGE, PINK, YELLOW)
-     */
     fun playSimonTone(tone: SimonTone) {
         if (!gameSoundEnabled) return
 
         try {
-            // Зупинити попередній тон
             mediaPlayer?.release()
 
             val resName = simonToneResources[tone] ?: return
             val resId = context.resources.getIdentifier(resName, "raw", context.packageName)
 
             if (resId == 0) {
-                Log.w(TAG, "Simon tone not found: $resName")
                 return
             }
 
@@ -158,27 +130,65 @@ class SoundManager(
             }
             mediaPlayer?.start()
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to play Simon tone: ${tone.name}", e)
         }
     }
 
-    /**
-     * Зупинити поточний Simon тон
-     */
     fun stopSimonTone() {
         mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = null
     }
 
-    /**
-     * Звільнити ресурси
-     */
+    fun startBackgroundMusic() {
+        if (isMusicStarted || !uiSoundEnabled) return
+        
+        try {
+            val resId = context.resources.getIdentifier("bg_music", "raw", context.packageName)
+            if (resId == 0) {
+                return
+            }
+            
+            backgroundMusicPlayer = MediaPlayer.create(context, resId)?.apply {
+                isLooping = true
+                setVolume(0.5f, 0.5f)
+                start()
+            }
+            isMusicStarted = true
+        } catch (e: Exception) {
+        }
+    }
+
+    fun pauseBackgroundMusic() {
+        backgroundMusicPlayer?.let {
+            if (it.isPlaying) {
+                it.pause()
+            }
+        }
+    }
+
+    fun resumeBackgroundMusic() {
+        if (!uiSoundEnabled || !isMusicStarted) return
+        
+        backgroundMusicPlayer?.let {
+            if (!it.isPlaying) {
+                it.start()
+            }
+        }
+    }
+
+    fun stopBackgroundMusic() {
+        backgroundMusicPlayer?.stop()
+        backgroundMusicPlayer?.release()
+        backgroundMusicPlayer = null
+        isMusicStarted = false
+    }
+
     fun release() {
         soundPool?.release()
         soundPool = null
         mediaPlayer?.release()
         mediaPlayer = null
+        stopBackgroundMusic()
     }
 
     enum class SimonTone {

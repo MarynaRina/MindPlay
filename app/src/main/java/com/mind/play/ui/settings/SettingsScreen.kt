@@ -57,7 +57,6 @@ fun SettingsScreen(
         )
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Contrast setting
         SettingCard(
             backgroundColor = Color.White.copy(alpha = 0.95f)
         ) {
@@ -68,8 +67,8 @@ fun SettingsScreen(
             ) {
                 Text(
                     text = "Kontrast i czytelność",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MindPlayTheme.colors.textSecondary,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                    color = MindPlayTheme.colors.textPrimary,
                     modifier = Modifier.weight(1f)
                 )
                 MindPlayToggle(
@@ -80,14 +79,13 @@ fun SettingsScreen(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Text size setting
         SettingCard(
             backgroundColor = Color.White.copy(alpha = 0.95f)
         ) {
             Text(
                 text = "Rozmiar tekstu",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MindPlayTheme.colors.textSecondary,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                color = MindPlayTheme.colors.textPrimary,
                 modifier = Modifier.align(Alignment.Start)
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -114,7 +112,6 @@ fun SettingsScreen(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Stress mode setting
         SettingCard(
             backgroundColor = Color.White.copy(alpha = 0.95f)
         ) {
@@ -125,8 +122,8 @@ fun SettingsScreen(
             ) {
                 Text(
                     text = "Tryb bez stresu",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MindPlayTheme.colors.textSecondary,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                    color = MindPlayTheme.colors.textPrimary,
                     modifier = Modifier.weight(1f)
                 )
                 MindPlayToggle(
@@ -137,19 +134,17 @@ fun SettingsScreen(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Sound settings section
         SettingCard(
             backgroundColor = Color.White.copy(alpha = 0.95f)
         ) {
             Text(
                 text = "Dźwięki",
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                color = MindPlayTheme.colors.textHeading,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                color = MindPlayTheme.colors.textPrimary,
                 modifier = Modifier.align(Alignment.Start)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // UI Sound (background music)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -163,8 +158,8 @@ fun SettingsScreen(
                 )
                 Text(
                     text = "Dźwięki interfejsu",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MindPlayTheme.colors.textSecondary,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                    color = MindPlayTheme.colors.textPrimary,
                     modifier = Modifier.weight(1f)
                 )
                 MindPlayToggle(
@@ -174,7 +169,6 @@ fun SettingsScreen(
             }
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Game Sound (sound effects)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -188,8 +182,8 @@ fun SettingsScreen(
                 )
                 Text(
                     text = "Dźwięki gier",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MindPlayTheme.colors.textSecondary,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                    color = MindPlayTheme.colors.textPrimary,
                     modifier = Modifier.weight(1f)
                 )
                 MindPlayToggle(
@@ -200,7 +194,6 @@ fun SettingsScreen(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Notifications setting
         SettingCard(
             backgroundColor = Color.White.copy(alpha = 0.95f)
         ) {
@@ -218,13 +211,13 @@ fun SettingsScreen(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Przypomnienia",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MindPlayTheme.colors.textSecondary
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                        color = MindPlayTheme.colors.textPrimary
                     )
                     Text(
                         text = "Codzienne powiadomienia o 10:00",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MindPlayTheme.colors.textSecondary.copy(alpha = 0.7f)
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MindPlayTheme.colors.textSecondary
                     )
                 }
                 MindPlayToggle(

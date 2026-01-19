@@ -1,5 +1,9 @@
 package com.mind.play.ui.games.uwaga
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,10 +36,12 @@ import androidx.compose.ui.unit.dp
 import com.mind.play.R
 import com.mind.play.core.components.GameResultMetric
 import com.mind.play.core.components.GameResultScreen
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.ui.games.uwaga.components.UwagaBlock
 import com.mind.play.ui.games.uwaga.components.UwagaPauseOverlay
 import com.mind.play.ui.theme.MindPlayTheme
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 fun UwagaGameScreen(
@@ -46,8 +52,12 @@ fun UwagaGameScreen(
     val gameState by viewModel.gameState.collectAsState()
     var showIntro by remember { mutableStateOf(true) }
     
-    when {
-        showIntro -> {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = showIntro,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
+        ) {
             UwagaIntroScreen(
                 onStartGame = {
                     showIntro = false
@@ -55,36 +65,45 @@ fun UwagaGameScreen(
                 }
             )
         }
-        gameState.isFinished -> {
-            val isSuccess = viewModel.isGameSuccess()
-            val timeTaken = viewModel.formatDuration(viewModel.getGameDuration())
-            
-            GameResultScreen(
-                isSuccess = isSuccess,
-                score = gameState.correctCount,
-                totalTasks = gameState.totalTasks,
-                onPlayAgain = {
-                    viewModel.startGame()
-                },
-                onBack = onBack,
-                customMetrics = listOf(
-                    GameResultMetric(
-                        label = "Czas:",
-                        value = timeTaken
-                    ),
-                    GameResultMetric(
-                        label = "Poprawne odpowiedzi:",
-                        value = "${gameState.correctCount}/${gameState.totalTasks}"
+        
+        AnimatedVisibility(
+            visible = !showIntro,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
+        ) {
+            when {
+                gameState.isFinished -> {
+                    val isSuccess = viewModel.isGameSuccess()
+                    val timeTaken = viewModel.formatDuration(viewModel.getGameDuration())
+                    
+                    GameResultScreen(
+                        isSuccess = isSuccess,
+                        score = gameState.correctCount,
+                        totalTasks = gameState.totalTasks,
+                        onPlayAgain = {
+                            viewModel.startGame()
+                        },
+                        onBack = onBack,
+                        customMetrics = listOf(
+                            GameResultMetric(
+                                label = "Czas:",
+                                value = timeTaken
+                            ),
+                            GameResultMetric(
+                                label = "Poprawne odpowiedzi:",
+                                value = "${gameState.correctCount}/${gameState.totalTasks}"
+                            )
+                        )
                     )
-                )
-            )
-        }
-        else -> {
-            UwagaGameContent(
-                gameState = gameState,
-                viewModel = viewModel,
-                onBack = onBack
-            )
+                }
+                else -> {
+                    UwagaGameContent(
+                        gameState = gameState,
+                        viewModel = viewModel,
+                        onBack = onBack
+                    )
+                }
+            }
         }
     }
 }
@@ -93,7 +112,8 @@ fun UwagaGameScreen(
 private fun UwagaGameContent(
     gameState: UwagaGameState,
     viewModel: UwagaViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    soundManager: SoundManager = koinInject()
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -102,7 +122,6 @@ private fun UwagaGameContent(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(top = 16.dp)
         ) {
-            // Top bar with back button, progress/timer and pause
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -110,7 +129,10 @@ private fun UwagaGameContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = onBack,
+                    onClick = {
+                        soundManager.playTap()
+                        onBack()
+                    },
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -122,8 +144,7 @@ private fun UwagaGameContent(
                 }
                 
                 Spacer(modifier = Modifier.weight(1f))
-                
-                // Show timer when stress mode is active (stressMode toggle is OFF)
+
                 if (!gameState.stressMode) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -161,7 +182,10 @@ private fun UwagaGameContent(
                 Spacer(modifier = Modifier.weight(1f))
                 
                 IconButton(
-                    onClick = { viewModel.pauseGame() },
+                    onClick = {
+                        soundManager.playTap()
+                        viewModel.pauseGame()
+                    },
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -174,8 +198,7 @@ private fun UwagaGameContent(
             }
             
             Spacer(modifier = Modifier.height(24.dp))
-            
-            // 3x5 Grid of blocks
+
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
@@ -197,8 +220,7 @@ private fun UwagaGameContent(
             
             Spacer(modifier = Modifier.weight(1f))
         }
-        
-        // Pause overlay
+
         if (gameState.isPaused) {
             UwagaPauseOverlay(
                 onResume = { viewModel.resumeGame() }

@@ -10,9 +10,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import androidx.datastore.preferences.core.booleanPreferencesKey
 
-/**
- * BroadcastReceiver для відновлення запланованих нагадувань після перезавантаження пристрою
- */
 class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -27,7 +24,6 @@ class BootReceiver : BroadcastReceiver() {
                         scheduler.scheduleDailyReminder()
                     }
                 } catch (e: Exception) {
-                    // Ігноруємо помилки при читанні налаштувань
                 }
             }
         }

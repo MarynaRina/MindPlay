@@ -2,6 +2,7 @@ package com.mind.play.ui.games.puzzle
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.domain.models.GameResult
 import com.mind.play.domain.repository.ProgressRepository
@@ -17,7 +18,8 @@ import kotlin.math.abs
 
 class PuzzleViewModel(
     private val settingsRepository: SettingsRepository,
-    private val progressRepository: ProgressRepository
+    private val progressRepository: ProgressRepository,
+    private val soundManager: SoundManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PuzzleGameState())
@@ -126,6 +128,8 @@ class PuzzleViewModel(
         val col2 = emptyIndex % size
 
         if (abs(row1 - row2) + abs(col1 - col2) == 1) {
+            soundManager.playTap()
+            
             tiles[emptyIndex] = tiles[index]
             tiles[index] = 0
 
@@ -179,6 +183,10 @@ class PuzzleViewModel(
         val calculatedScore = if (isWin) {
             (1000 + difficultyBonus - (_state.value.moves * 5) - (duration * 2)).coerceAtLeast(10)
         } else 0
+
+        if (isWin) {
+            soundManager.playCorrect()
+        }
 
         _state.update {
             it.copy(

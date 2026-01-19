@@ -1,12 +1,12 @@
-package com.mind.play.ui.games.memory
+package com.mind.play.ui.games.pary
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,31 +42,33 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mind.play.R
+import com.mind.play.core.components.AnimatedCard
 import com.mind.play.core.components.GameResultScreen
 import com.mind.play.core.components.PrimaryButton
 import com.mind.play.core.components.SecondaryButton
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.ui.theme.BackgroundLight
-import com.mind.play.ui.theme.CardBlue
 import com.mind.play.ui.theme.ErrorRed
 import com.mind.play.ui.theme.MindPlayTheme
 import com.mind.play.ui.theme.RubikBold
 import com.mind.play.ui.theme.SuccessGreen
 import org.koin.androidx.compose.koinViewModel
-import com.mind.play.core.sound.SoundManager
 import org.koin.compose.koinInject
 
+private val CardDefault = Color.White
+private val CardSelected = Color(0xFFE3F2FD)
+
 @Composable
-fun MemoryScreen(
+fun ParyScreen(
     onBack: () -> Unit,
     onFinish: (score: Int) -> Unit = {},
-    viewModel: MemoryViewModel = koinViewModel()
+    viewModel: ParyViewModel = koinViewModel()
 ) {
     val gameState by viewModel.gameState.collectAsState()
 
@@ -75,7 +78,7 @@ fun MemoryScreen(
             .background(BackgroundLight)
     ) {
         AnimatedVisibility(
-            visible = gameState.gamePhase == MemoryGamePhase.INTRO,
+            visible = gameState.gamePhase == ParyGamePhase.INTRO,
             enter = fadeIn(animationSpec = tween(300)),
             exit = fadeOut(animationSpec = tween(300))
         ) {
@@ -87,12 +90,12 @@ fun MemoryScreen(
         }
 
         AnimatedVisibility(
-            visible = gameState.gamePhase != MemoryGamePhase.INTRO && gameState.gamePhase != MemoryGamePhase.FINISHED,
+            visible = gameState.gamePhase != ParyGamePhase.INTRO && gameState.gamePhase != ParyGamePhase.FINISHED,
             enter = fadeIn(animationSpec = tween(300)),
             exit = fadeOut(animationSpec = tween(300))
         ) {
             when (gameState.gamePhase) {
-                MemoryGamePhase.PLAYING -> {
+                ParyGamePhase.PLAYING -> {
                     GamePlayScreen(
                         gameState = gameState,
                         onCardClick = { viewModel.onCardClick(it) },
@@ -102,7 +105,7 @@ fun MemoryScreen(
                     )
                 }
 
-                MemoryGamePhase.PAUSED -> {
+                ParyGamePhase.PAUSED -> {
                     GamePlayScreen(
                         gameState = gameState,
                         onCardClick = {},
@@ -113,23 +116,12 @@ fun MemoryScreen(
                     PauseOverlay(onResume = { viewModel.resumeGame() })
                 }
 
-                MemoryGamePhase.ROUND_COMPLETE -> {
-                    GamePlayScreen(
-                        gameState = gameState,
-                        onCardClick = {},
-                        onPauseClick = {},
-                        onBackClick = {},
-                        blurred = true
-                    )
-                    RoundCompleteOverlay(onNextRound = { viewModel.nextRound() })
-                }
-                
                 else -> Unit
             }
         }
-
+        
         AnimatedVisibility(
-            visible = gameState.gamePhase == MemoryGamePhase.FINISHED,
+            visible = gameState.gamePhase == ParyGamePhase.FINISHED,
             enter = fadeIn(animationSpec = tween(300)),
             exit = fadeOut(animationSpec = tween(300))
         ) {
@@ -140,8 +132,8 @@ fun MemoryScreen(
             
             GameResultScreen(
                 isSuccess = isSuccess,
-                score = gameState.matchedPairs * 2,
-                totalTasks = gameState.gridMode.totalCards,
+                score = gameState.correctAnswers,
+                totalTasks = gameState.totalRounds,
                 onPlayAgain = { viewModel.restartGame() },
                 onBack = {
                     viewModel.saveGameResult()
@@ -156,8 +148,8 @@ fun MemoryScreen(
 
 @Composable
 private fun IntroScreen(
-    selectedMode: MemoryGridMode,
-    onSelectMode: (MemoryGridMode) -> Unit,
+    selectedMode: ParyGridMode,
+    onSelectMode: (ParyGridMode) -> Unit,
     onStartClick: () -> Unit,
     soundManager: SoundManager = koinInject()
 ) {
@@ -169,7 +161,7 @@ private fun IntroScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Memory",
+            text = "Pary / Różnice",
             style = MaterialTheme.typography.displayLarge,
             color = MindPlayTheme.colors.textPrimary,
             fontFamily = RubikBold
@@ -178,8 +170,8 @@ private fun IntroScreen(
         Spacer(modifier = Modifier.height(18.dp))
 
         Text(
-            text = "Odsłaniaj po dwa pola i staraj się znaleźć pasujące pary. " +
-                    "Zapamiętaj ich położenie i dopasuj wszystkie pary, aby ukończyć rundę.",
+            text = "Wybierz element, który różni się od pozostałych, lub połącz dwa identyczne elementy. " +
+                    "Skup się i znajdź właściwą odpowiedź. Nie ma pośpiechu — graj w swoim tempie.",
             style = MaterialTheme.typography.bodyLarge,
             color = MindPlayTheme.colors.textSecondary,
             modifier = Modifier.padding(end = 8.dp)
@@ -199,13 +191,13 @@ private fun IntroScreen(
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ModeChip(
                 text = "2×4",
-                selected = selectedMode == MemoryGridMode.GRID_2X4,
-                onClick = { onSelectMode(MemoryGridMode.GRID_2X4) }
+                selected = selectedMode == ParyGridMode.GRID_2X4,
+                onClick = { onSelectMode(ParyGridMode.GRID_2X4) }
             )
             ModeChip(
                 text = "3×4",
-                selected = selectedMode == MemoryGridMode.GRID_3X4,
-                onClick = { onSelectMode(MemoryGridMode.GRID_3X4) }
+                selected = selectedMode == ParyGridMode.GRID_3X4,
+                onClick = { onSelectMode(ParyGridMode.GRID_3X4) }
             )
         }
 
@@ -230,7 +222,6 @@ private fun ModeChip(
     soundManager: SoundManager = koinInject()
 ) {
     val bg = if (selected) Color.White else Color.White.copy(alpha = 0.75f)
-    val border = if (selected) MindPlayTheme.colors.textPrimary.copy(alpha = 0.15f) else Color.Transparent
 
     Box(
         modifier = Modifier
@@ -244,7 +235,10 @@ private fun ModeChip(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onClick
+                onClick = {
+                    soundManager.playTap()
+                    onClick()
+                }
             )
             .padding(horizontal = 18.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
@@ -260,7 +254,7 @@ private fun ModeChip(
 
 @Composable
 private fun GamePlayScreen(
-    gameState: MemoryGameState,
+    gameState: ParyGameState,
     onCardClick: (Int) -> Unit,
     onPauseClick: () -> Unit,
     onBackClick: () -> Unit,
@@ -328,7 +322,7 @@ private fun GamePlayScreen(
                     color = MindPlayTheme.colors.textSecondary
                 )
                 Text(
-                    text = "${gameState.matchedPairs * 2}/${gameState.gridMode.totalCards}",
+                    text = "${gameState.correctAnswers}/${gameState.totalRounds}",
                     style = MaterialTheme.typography.titleMedium,
                     color = MindPlayTheme.colors.textHeading
                 )
@@ -367,7 +361,7 @@ private fun GamePlayScreen(
                 verticalArrangement = Arrangement.spacedBy(spacing)
             ) {
                 itemsIndexed(gameState.cards) { index, card ->
-                    MemoryCardItem(
+                    ParyCardItem(
                         card = card,
                         onClick = { onCardClick(index) },
                         modifier = Modifier.aspectRatio(1f)
@@ -375,55 +369,43 @@ private fun GamePlayScreen(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
 @Composable
-private fun MemoryCardItem(
-    card: MemoryCard,
+private fun ParyCardItem(
+    card: ParyCard,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val rotation by animateFloatAsState(
-        targetValue = if (card.isFlipped || card.isMatched) 180f else 0f,
-        animationSpec = tween(durationMillis = 300),
-        label = "card_rotation"
-    )
-
     val cardColor = when {
-        card.isMatched -> SuccessGreen
-        card.isMismatched -> ErrorRed
-        card.isFlipped -> Color.White
-        else -> CardBlue
+        card.isCorrect -> SuccessGreen
+        card.isWrong -> ErrorRed
+        card.isSelected -> CardSelected
+        else -> CardDefault
     }
 
-    Box(
-        modifier = modifier
-            .graphicsLayer {
-                rotationY = rotation
-                cameraDistance = 12f * density
-            }
-            .shadow(
-                elevation = 10.dp,
-                shape = RoundedCornerShape(18.dp),
-                clip = false
-            )
-            .clip(RoundedCornerShape(18.dp))
-            .background(cardColor)
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        if (rotation > 90f) {
+    AnimatedCard(
+        modifier = modifier,
+        onClick = onClick
+    ) { animatedModifier ->
+        Box(
+            modifier = animatedModifier
+                .shadow(
+                    elevation = 10.dp,
+                    shape = RoundedCornerShape(18.dp),
+                    clip = false
+                )
+                .clip(RoundedCornerShape(18.dp))
+                .background(cardColor),
+            contentAlignment = Alignment.Center
+        ) {
             Image(
                 painter = painterResource(id = card.iconType.iconRes),
                 contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize(0.5f)
-                    .graphicsLayer { rotationY = 180f }
+                modifier = Modifier.fillMaxSize(0.5f)
             )
         }
     }
@@ -486,43 +468,6 @@ private fun PauseOverlay(
 }
 
 @Composable
-private fun RoundCompleteOverlay(
-    onNextRound: () -> Unit,
-    soundManager: SoundManager = koinInject()
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.35f))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = { }
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_play),
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(96.dp)
-            )
-
-            Spacer(modifier = Modifier.height(18.dp))
-
-            PillButton(
-                text = "GRAJ DALEJ",
-                onClick = {
-                    soundManager.playTap()
-                    onNextRound()
-                }
-            )
-        }
-    }
-}
-
-@Composable
 private fun PillButton(
     text: String,
     onClick: () -> Unit
@@ -549,7 +494,6 @@ private fun PillButton(
     }
 }
 
-@Composable
 private fun formatTime(seconds: Int): String {
     val minutes = seconds / 60
     val secs = seconds % 60

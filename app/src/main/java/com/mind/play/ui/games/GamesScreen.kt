@@ -22,7 +22,9 @@ import androidx.compose.ui.unit.dp
 import com.mind.play.R
 import com.mind.play.core.components.AnimatedCard
 import com.mind.play.core.navigation.Screen
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.ui.theme.MindPlayTheme
+import org.koin.compose.koinInject
 
 data class Game(
     val id: String,
@@ -85,10 +87,14 @@ fun GamesScreen(
 @Composable
 private fun GameCard(
     game: Game,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    soundManager: SoundManager = koinInject()
 ) {
     AnimatedCard(
-        onClick = onClick,
+        onClick = {
+            soundManager.playTap()
+            onClick()
+        },
         pressScale = 0.92f,
         animationDuration = 100
     ) { modifier ->

@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.mind.play.core.components.AnimatedCard
 import com.mind.play.domain.models.ArithmeticTask
 import com.mind.play.ui.theme.ErrorRed
 import com.mind.play.ui.theme.MindPlayTheme

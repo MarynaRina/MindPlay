@@ -1,5 +1,9 @@
 package com.mind.play.ui.games.arithmetic
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +32,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.mind.play.R
 import com.mind.play.core.components.GameResultScreen
+import com.mind.play.core.sound.SoundManager
+import org.koin.compose.koinInject
 import com.mind.play.core.components.MindPlayProgressBar
 import com.mind.play.ui.games.arithmetic.components.PauseOverlay
 import com.mind.play.ui.games.arithmetic.components.TaskCard
@@ -43,8 +49,12 @@ fun ArithmeticGameScreen(
     val gameState by viewModel.gameState.collectAsState()
     var showIntro by remember { mutableStateOf(true) }
     
-    when {
-        showIntro -> {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = showIntro,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
+        ) {
             ArithmeticIntroScreen(
                 onStartGame = {
                     showIntro = false
@@ -52,29 +62,38 @@ fun ArithmeticGameScreen(
                 }
             )
         }
-        gameState.isFinished -> {
-            val isSuccess = gameState.score >= (gameState.totalTasks * 0.6).toInt()
-            val timeTaken = if (!gameState.stressMode) {
-                viewModel.formatTime(120 - gameState.timeLeftSeconds)
-            } else null
-            
-            GameResultScreen(
-                isSuccess = isSuccess,
-                score = gameState.score,
-                totalTasks = gameState.totalTasks,
-                onPlayAgain = {
-                    viewModel.startGame()
-                },
-                onBack = onBack,
-                timeTaken = timeTaken
-            )
-        }
-        else -> {
-            GameContent(
-                gameState = gameState,
-                viewModel = viewModel,
-                onBack = onBack
-            )
+        
+        AnimatedVisibility(
+            visible = !showIntro,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
+        ) {
+            when {
+                gameState.isFinished -> {
+                    val isSuccess = gameState.score >= (gameState.totalTasks * 0.6).toInt()
+                    val timeTaken = if (!gameState.stressMode) {
+                        viewModel.formatTime(120 - gameState.timeLeftSeconds)
+                    } else null
+                    
+                    GameResultScreen(
+                        isSuccess = isSuccess,
+                        score = gameState.score,
+                        totalTasks = gameState.totalTasks,
+                        onPlayAgain = {
+                            viewModel.startGame()
+                        },
+                        onBack = onBack,
+                        timeTaken = timeTaken
+                    )
+                }
+                else -> {
+                    GameContent(
+                        gameState = gameState,
+                        viewModel = viewModel,
+                        onBack = onBack
+                    )
+                }
+            }
         }
     }
 }
@@ -83,7 +102,8 @@ fun ArithmeticGameScreen(
 private fun GameContent(
     gameState: com.mind.play.domain.models.ArithmeticGameState,
     viewModel: ArithmeticViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    soundManager: SoundManager = koinInject()
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -99,7 +119,10 @@ private fun GameContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = onBack,
+                    onClick = {
+                        soundManager.playTap()
+                        onBack()
+                    },
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -149,7 +172,10 @@ private fun GameContent(
                 Spacer(modifier = Modifier.weight(1f))
                 
                 IconButton(
-                    onClick = { viewModel.pauseGame() },
+                    onClick = {
+                        soundManager.playTap()
+                        viewModel.pauseGame()
+                    },
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -194,3 +220,5 @@ private fun GameContent(
         }
     }
 }
+
+

@@ -15,12 +15,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mind.play.core.components.PrimaryButton
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.ui.theme.MindPlayTheme
+import org.koin.compose.koinInject
 
 @Composable
 fun ArithmeticIntroScreen(
     onStartGame: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    soundManager: SoundManager = koinInject()
 ) {
     Box(
         modifier = modifier
@@ -53,7 +56,10 @@ fun ArithmeticIntroScreen(
             
             PrimaryButton(
                 text = "ZACZYNAMY",
-                onClick = onStartGame,
+                onClick = {
+                    soundManager.playTap()
+                    onStartGame()
+                },
                 modifier = Modifier
             )
         }

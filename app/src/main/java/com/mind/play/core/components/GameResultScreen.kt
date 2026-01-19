@@ -18,7 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.ui.theme.MindPlayTheme
+import org.koin.compose.koinInject
 
 
 data class GameResultMetric(
@@ -43,7 +45,8 @@ fun GameResultScreen(
     backButtonText: String = "POWRÓT",
     customMetrics: List<GameResultMetric>? = null,
     scoreLabel: String = "Poprawne odpowiedzi:",
-    timeLabel: String = "Czas:"
+    timeLabel: String = "Czas:",
+    soundManager: SoundManager = koinInject()
 ) {
     Box(
         modifier = modifier
@@ -120,14 +123,20 @@ fun GameResultScreen(
             
             PrimaryButton(
                 text = playAgainButtonText,
-                onClick = onPlayAgain
+                onClick = {
+                    soundManager.playTap()
+                    onPlayAgain()
+                }
             )
             
             Spacer(modifier = Modifier.height(16.dp))
             
             SecondaryButton(
                 text = backButtonText,
-                onClick = onBack
+                onClick = {
+                    soundManager.playTap()
+                    onBack()
+                }
             )
         }
     }

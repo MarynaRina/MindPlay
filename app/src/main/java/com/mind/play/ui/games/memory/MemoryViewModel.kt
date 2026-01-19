@@ -2,6 +2,7 @@ package com.mind.play.ui.games.memory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.domain.models.GameResult
 import com.mind.play.domain.repository.ProgressRepository
@@ -15,7 +16,8 @@ import kotlinx.coroutines.launch
 
 class MemoryViewModel(
     private val settingsRepository: SettingsRepository,
-    private val progressRepository: ProgressRepository
+    private val progressRepository: ProgressRepository,
+    private val soundManager: SoundManager
 ) : ViewModel() {
 
     private val _gameState = MutableStateFlow(MemoryGameState())
@@ -26,9 +28,7 @@ class MemoryViewModel(
     private companion object {
         private const val START_TIME_SECONDS = 60
 
-        // Підсвітка неправильного вибору: спочатку даємо карткам "дорозкритись"
         private const val REVEAL_BEFORE_HIGHLIGHT_MS = 220L
-        // Тримаємо червону підсвітку так, щоб разом було ~0.8 сек
         private const val MISMATCH_HIGHLIGHT_MS = 580L
 
         private const val MATCH_FEEDBACK_DELAY_MS = 150L
@@ -39,9 +39,6 @@ class MemoryViewModel(
             settingsRepository.settings.collect { settings ->
                 settings?.let {
                     _gameState.update { state ->
-                        // IMPORTANT: логіка режимів поміняна місцями (як ти просив)
-                        // Було: isStressMode = it.stressMode
-                        // Стало: isStressMode = !it.stressMode
                         state.copy(isStressMode = !it.stressMode)
                     }
                 }
@@ -49,9 +46,6 @@ class MemoryViewModel(
         }
     }
 
-    /**
-     * Вибір сітки ДО старту гри (2x4 / 3x4)
-     */
     fun setGridMode(mode: MemoryGridMode) {
         val state = _gameState.value
         if (state.gamePhase != MemoryGamePhase.INTRO) return
@@ -114,6 +108,8 @@ class MemoryViewModel(
             return
         }
 
+        soundManager.playTap()
+
         if (state.firstSelectedCard == null) {
             _gameState.update { s ->
                 s.copy(
@@ -147,6 +143,7 @@ class MemoryViewModel(
             val secondCard = state.cards[secondIndex]
 
             if (firstCard.iconType == secondCard.iconType) {
+                soundManager.playCorrect()
                 delay(MATCH_FEEDBACK_DELAY_MS)
 
                 _gameState.update { s ->
@@ -165,20 +162,18 @@ class MemoryViewModel(
                         secondSelectedCard = null,
                         isProcessing = false,
                         gamePhase = if (allMatched) {
-                            if (s.currentRound >= s.totalRounds) MemoryGamePhase.FINISHED
-                            else MemoryGamePhase.ROUND_COMPLETE
+                            MemoryGamePhase.FINISHED
                         } else s.gamePhase
                     )
                 }
 
-                // стоп таймеру між раундами/фініші (як і було)
-                if (_gameState.value.gamePhase in listOf(MemoryGamePhase.ROUND_COMPLETE, MemoryGamePhase.FINISHED)) {
+                if (_gameState.value.gamePhase == MemoryGamePhase.FINISHED) {
                     timerJob?.cancel()
                 }
             } else {
-                // Червону підсвітку включаємо з затримкою,
-                // щоб спочатку карта встигла розкритися
                 delay(REVEAL_BEFORE_HIGHLIGHT_MS)
+
+                soundManager.playWrong()
 
                 _gameState.update { s ->
                     s.copy(
@@ -221,10 +216,8 @@ class MemoryViewModel(
                 isProcessing = false,
                 gamePhase = MemoryGamePhase.PLAYING,
 
-                // IMPORTANT: тепер таймер скидається КОЖЕН раунд (1 хвилина на раунд)
                 timeRemainingSeconds = if (state.isStressMode) START_TIME_SECONDS else state.timeRemainingSeconds,
 
-                // якщо програли по часу раніше — при новому раунді це неактуально
                 isTimeUp = false
             )
         }
@@ -308,7 +301,6 @@ class MemoryViewModel(
     fun restartGame() {
         timerJob?.cancel()
         _gameState.update { current ->
-            // зберігаємо обраний режим сітки та режим таймера
             MemoryGameState(
                 isStressMode = current.isStressMode,
                 gridMode = current.gridMode,

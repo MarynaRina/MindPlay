@@ -1,5 +1,9 @@
 package com.mind.play.ui.games.simon
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,10 +35,12 @@ import androidx.compose.ui.unit.dp
 import com.mind.play.R
 import com.mind.play.core.components.GameResultMetric
 import com.mind.play.core.components.GameResultScreen
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.ui.games.simon.components.SimonBlock
 import com.mind.play.ui.games.simon.components.SimonPauseOverlay
 import com.mind.play.ui.theme.MindPlayTheme
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 fun SimonGameScreen(
@@ -45,8 +51,12 @@ fun SimonGameScreen(
     val gameState by viewModel.gameState.collectAsState()
     var showIntro by remember { mutableStateOf(true) }
     
-    when {
-        showIntro -> {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = showIntro,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
+        ) {
             SimonIntroScreen(
                 onStartGame = {
                     showIntro = false
@@ -54,36 +64,47 @@ fun SimonGameScreen(
                 }
             )
         }
-        gameState.isFinished -> {
-            val completedRounds = viewModel.getCompletedRounds()
-            val timeTaken = viewModel.formatTime(viewModel.getGameDuration())
-            
-            GameResultScreen(
-                isSuccess = true,
-                score = completedRounds,
-                totalTasks = completedRounds,
-                onPlayAgain = {
-                    viewModel.startGame()
-                },
-                onBack = onBack,
-                customMetrics = listOf(
-                    GameResultMetric(
-                        label = "Czas:",
-                        value = timeTaken
-                    ),
-                    GameResultMetric(
-                        label = "Poprawne odpowiedzi:",
-                        value = completedRounds.toString()
+        
+        AnimatedVisibility(
+            visible = !showIntro,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
+        ) {
+            when {
+                gameState.isFinished -> {
+                    val completedRounds = viewModel.getCompletedRounds()
+                    val timeTaken = viewModel.formatTime(viewModel.getGameDuration())
+                    
+                    GameResultScreen(
+                        isSuccess = true,
+                        score = completedRounds,
+                        totalTasks = completedRounds,
+                        onPlayAgain = {
+                            viewModel.startGame()
+                        },
+                        onBack = onBack,
+                        successTitle = "Udało się!",
+                        successMessage = "Świetna robota! 🙌 Oto Twój wynik:",
+                        customMetrics = listOf(
+                            GameResultMetric(
+                                label = "Czas:",
+                                value = timeTaken
+                            ),
+                            GameResultMetric(
+                                label = "Ukończone rundy:",
+                                value = completedRounds.toString()
+                            )
+                        )
                     )
-                )
-            )
-        }
-        else -> {
-            SimonGameContent(
-                gameState = gameState,
-                viewModel = viewModel,
-                onBack = onBack
-            )
+                }
+                else -> {
+                    SimonGameContent(
+                        gameState = gameState,
+                        viewModel = viewModel,
+                        onBack = onBack
+                    )
+                }
+            }
         }
     }
 }
@@ -92,7 +113,8 @@ fun SimonGameScreen(
 private fun SimonGameContent(
     gameState: SimonGameState,
     viewModel: SimonViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    soundManager: SoundManager = koinInject()
 ) {
     val isPlayerTurn = gameState.phase == SimonGamePhase.PLAYER_INPUT
     
@@ -103,7 +125,6 @@ private fun SimonGameContent(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(top = 16.dp)
         ) {
-            // Top bar with back button, progress and pause
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -111,7 +132,10 @@ private fun SimonGameContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = onBack,
+                    onClick = {
+                        soundManager.playTap()
+                        onBack()
+                    },
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -142,7 +166,10 @@ private fun SimonGameContent(
                 Spacer(modifier = Modifier.weight(1f))
                 
                 IconButton(
-                    onClick = { viewModel.pauseGame() },
+                    onClick = {
+                        soundManager.playTap()
+                        viewModel.pauseGame()
+                    },
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
@@ -155,8 +182,7 @@ private fun SimonGameContent(
             }
             
             Spacer(modifier = Modifier.weight(1f))
-            
-            // Simon blocks grid - 2x2
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -172,6 +198,7 @@ private fun SimonGameContent(
                         color = SimonColor.GREEN,
                         isHighlighted = gameState.highlightedColor == SimonColor.GREEN || 
                                        (isPlayerTurn && gameState.highlightedColor == SimonColor.GREEN),
+                        isWrong = gameState.wrongColor == SimonColor.GREEN,
                         isInteractive = isPlayerTurn && !gameState.isPaused,
                         onClick = { viewModel.onColorPressed(SimonColor.GREEN) },
                         modifier = Modifier.weight(1f)
@@ -181,6 +208,7 @@ private fun SimonGameContent(
                         color = SimonColor.ORANGE,
                         isHighlighted = gameState.highlightedColor == SimonColor.ORANGE ||
                                        (isPlayerTurn && gameState.highlightedColor == SimonColor.ORANGE),
+                        isWrong = gameState.wrongColor == SimonColor.ORANGE,
                         isInteractive = isPlayerTurn && !gameState.isPaused,
                         onClick = { viewModel.onColorPressed(SimonColor.ORANGE) },
                         modifier = Modifier.weight(1f)
@@ -195,6 +223,7 @@ private fun SimonGameContent(
                         color = SimonColor.PINK,
                         isHighlighted = gameState.highlightedColor == SimonColor.PINK ||
                                        (isPlayerTurn && gameState.highlightedColor == SimonColor.PINK),
+                        isWrong = gameState.wrongColor == SimonColor.PINK,
                         isInteractive = isPlayerTurn && !gameState.isPaused,
                         onClick = { viewModel.onColorPressed(SimonColor.PINK) },
                         modifier = Modifier.weight(1f)
@@ -204,6 +233,7 @@ private fun SimonGameContent(
                         color = SimonColor.YELLOW,
                         isHighlighted = gameState.highlightedColor == SimonColor.YELLOW ||
                                        (isPlayerTurn && gameState.highlightedColor == SimonColor.YELLOW),
+                        isWrong = gameState.wrongColor == SimonColor.YELLOW,
                         isInteractive = isPlayerTurn && !gameState.isPaused,
                         onClick = { viewModel.onColorPressed(SimonColor.YELLOW) },
                         modifier = Modifier.weight(1f)
@@ -213,8 +243,7 @@ private fun SimonGameContent(
             
             Spacer(modifier = Modifier.weight(1f))
         }
-        
-        // Pause overlay
+
         if (gameState.isPaused) {
             SimonPauseOverlay(
                 onResume = { viewModel.resumeGame() }

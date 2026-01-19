@@ -2,6 +2,7 @@ package com.mind.play.ui.games.simon
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.domain.models.GameResult
 import com.mind.play.domain.repository.ProgressRepository
 import kotlinx.coroutines.Job
@@ -28,6 +29,7 @@ data class SimonGameState(
     val playerInput: List<SimonColor> = emptyList(),
     val currentRound: Int = 0,
     val highlightedColor: SimonColor? = null,
+    val wrongColor: SimonColor? = null,
     val phase: SimonGamePhase = SimonGamePhase.WAITING_TO_START,
     val isPaused: Boolean = false,
     val isFinished: Boolean = false,
@@ -36,7 +38,8 @@ data class SimonGameState(
 )
 
 class SimonViewModel(
-    private val progressRepository: ProgressRepository
+    private val progressRepository: ProgressRepository,
+    private val soundManager: SoundManager
 ) : ViewModel() {
     
     private val _gameState = MutableStateFlow(SimonGameState())
@@ -82,6 +85,7 @@ class SimonViewModel(
                 }
                 
                 _gameState.value = _gameState.value.copy(highlightedColor = color)
+                playColorSound(color)
                 delay(600)
                 _gameState.value = _gameState.value.copy(highlightedColor = null)
                 delay(300)
@@ -108,6 +112,8 @@ class SimonViewModel(
                 highlightedColor = color
             )
             
+            playColorSound(color)
+            
             viewModelScope.launch {
                 delay(200)
                 _gameState.value = _gameState.value.copy(highlightedColor = null)
@@ -118,7 +124,18 @@ class SimonViewModel(
                 }
             }
         } else {
-            finishGame()
+            _gameState.value = _gameState.value.copy(
+                wrongColor = color
+            )
+            
+            soundManager.playWrong()
+            
+            viewModelScope.launch {
+                delay(600)
+                _gameState.value = _gameState.value.copy(wrongColor = null)
+                delay(300)
+                finishGame()
+            }
         }
     }
     
@@ -185,6 +202,16 @@ class SimonViewModel(
         } else {
             System.currentTimeMillis() - _gameState.value.gameStartTimeMillis
         }
+    }
+    
+    private fun playColorSound(color: SimonColor) {
+        val tone = when (color) {
+            SimonColor.GREEN -> SoundManager.SimonTone.GREEN
+            SimonColor.ORANGE -> SoundManager.SimonTone.ORANGE
+            SimonColor.PINK -> SoundManager.SimonTone.PINK
+            SimonColor.YELLOW -> SoundManager.SimonTone.YELLOW
+        }
+        soundManager.playSimonTone(tone)
     }
     
     override fun onCleared() {

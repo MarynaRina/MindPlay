@@ -22,14 +22,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.ui.theme.InactiveGray
 import com.mind.play.ui.theme.MindPlayTheme
+import org.koin.compose.koinInject
 
 @Composable
 fun MindPlayToggle(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    soundManager: SoundManager = koinInject()
 ) {
     val offsetX by animateDpAsState(
         targetValue = if (checked) 32.dp else 0.dp,
@@ -51,7 +54,10 @@ fun MindPlayToggle(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = { onCheckedChange(!checked) }
+                onClick = {
+                    soundManager.playTap()
+                    onCheckedChange(!checked)
+                }
             )
             .padding(4.dp),
         contentAlignment = Alignment.CenterStart

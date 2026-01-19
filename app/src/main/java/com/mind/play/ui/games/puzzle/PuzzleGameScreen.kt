@@ -1,5 +1,9 @@
 package com.mind.play.ui.games.puzzle
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -11,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -32,10 +37,12 @@ import com.mind.play.R
 import com.mind.play.core.components.GameResultMetric
 import com.mind.play.core.components.GameResultScreen
 import com.mind.play.core.components.PrimaryButton
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.ui.games.arithmetic.components.PauseOverlay
 import com.mind.play.ui.games.puzzle.components.PuzzleBoard
 import com.mind.play.ui.theme.MindPlayTheme
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 fun PuzzleGameScreen(
@@ -45,8 +52,12 @@ fun PuzzleGameScreen(
     val state by viewModel.state.collectAsState()
     var showIntro by remember { mutableStateOf(true) }
 
-    when {
-        showIntro -> {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = showIntro,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
+        ) {
             PuzzleIntroScreen(
                 onStartGame = { selectedSize ->
                     showIntro = false
@@ -54,30 +65,39 @@ fun PuzzleGameScreen(
                 }
             )
         }
-        state.isFinished -> {
-            val metrics = mutableListOf<GameResultMetric>()
+        
+        AnimatedVisibility(
+            visible = !showIntro,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
+        ) {
+            when {
+                state.isFinished -> {
+                    val metrics = mutableListOf<GameResultMetric>()
 
-            metrics.add(GameResultMetric("Liczba ruchów:", state.moves.toString()))
+                    metrics.add(GameResultMetric("Liczba ruchów:", state.moves.toString()))
 
-            GameResultScreen(
-                isSuccess = state.isWin,
-                score = state.score,
-                totalTasks = 1,
-                customMetrics = metrics,
-                onPlayAgain = {
-                    viewModel.startGame(state.gridSize)
-                },
-                onBack = onBack,
-                failureTitle = "Czas minął!",
-                failureMessage = "Niestety czas dobiegł końca. Spróbuj ułożyć puzzle szybciej następnym razem!"
-            )
-        }
-        else -> {
-            PuzzleContent(
-                state = state,
-                viewModel = viewModel,
-                onBack = onBack
-            )
+                    GameResultScreen(
+                        isSuccess = state.isWin,
+                        score = state.score,
+                        totalTasks = 1,
+                        customMetrics = metrics,
+                        onPlayAgain = {
+                            viewModel.startGame(state.gridSize)
+                        },
+                        onBack = onBack,
+                        failureTitle = "Czas minął!",
+                        failureMessage = "Niestety czas dobiegł końca. Spróbuj ułożyć puzzle szybciej następnym razem!"
+                    )
+                }
+                else -> {
+                    PuzzleContent(
+                        state = state,
+                        viewModel = viewModel,
+                        onBack = onBack
+                    )
+                }
+            }
         }
     }
 }
@@ -86,33 +106,69 @@ fun PuzzleGameScreen(
 private fun PuzzleContent(
     state: PuzzleGameState,
     viewModel: PuzzleViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    soundManager: SoundManager = koinInject()
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(24.dp),
+                .padding(top = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onBack) {
+                IconButton(
+                    onClick = {
+                        soundManager.playTap()
+                        onBack()
+                    },
+                    modifier = Modifier.size(32.dp)
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = MindPlayTheme.colors.textHeading
+                        tint = MindPlayTheme.colors.textHeading,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
 
                 if (!state.stressMode) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Czas:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MindPlayTheme.colors.textSecondary
+                        )
+                        Text(
+                            text = viewModel.formatTime(state.timeLeftSeconds),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MindPlayTheme.colors.textHeading
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
-                        text = "Czas: ${viewModel.formatTime(state.timeLeftSeconds)}",
+                        text = "Ruchy:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MindPlayTheme.colors.textSecondary
+                    )
+                    Text(
+                        text = "${state.moves}",
                         style = MaterialTheme.typography.titleMedium,
                         color = MindPlayTheme.colors.textHeading
                     )
@@ -120,22 +176,31 @@ private fun PuzzleContent(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                IconButton(onClick = { viewModel.pauseGame() }) {
+                IconButton(
+                    onClick = {
+                        soundManager.playTap()
+                        viewModel.pauseGame()
+                    },
+                    modifier = Modifier.size(32.dp)
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_pause),
                         contentDescription = "Pause",
-                        tint = MindPlayTheme.colors.textHeading
+                        tint = MindPlayTheme.colors.textHeading,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth(0.85f)
                     .aspectRatio(1f)
-                    .border(1.dp, Color.Black)
+                    .border(1.dp, Color.Black),
+                contentAlignment = Alignment.Center
             ) {
                 PuzzleBoard(
                     tiles = state.tiles,
@@ -149,8 +214,13 @@ private fun PuzzleContent(
 
             PrimaryButton(
                 text = "OD NOWA",
-                onClick = { viewModel.restartGame() },
-                modifier = Modifier.padding(bottom = 16.dp)
+                onClick = {
+                    soundManager.playTap()
+                    viewModel.restartGame()
+                },
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp)
             )
         }
 

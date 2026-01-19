@@ -3,6 +3,7 @@ package com.mind.play.core.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -11,11 +12,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mind.play.core.components.MindPlayBottomNavigation
+import com.mind.play.core.sound.SoundManager
 import com.mind.play.data.repository.SettingsRepository
 import com.mind.play.ui.dashboard.HomeScreen
 import com.mind.play.ui.games.GamesScreen
 import com.mind.play.ui.games.arithmetic.ArithmeticGameScreen
 import com.mind.play.ui.games.memory.MemoryScreen
+import com.mind.play.ui.games.pary.ParyScreen
 import com.mind.play.ui.games.puzzle.PuzzleGameScreen
 import com.mind.play.ui.games.simon.SimonGameScreen
 import com.mind.play.ui.games.uwaga.UwagaGameScreen
@@ -31,6 +34,7 @@ fun MindPlayNavigation() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val settingsRepository: SettingsRepository = koinInject()
+    val soundManager: SoundManager = koinInject()
     val appSettings by settingsRepository.settings.collectAsState()
     val settingsLoaded = appSettings != null
     val shouldShowOnboarding = appSettings?.let { !it.onboardingCompleted } ?: false
@@ -66,7 +70,11 @@ fun MindPlayNavigation() {
             enterTransition = { NavigationAnimations.fadeInTransition() },
             exitTransition = { NavigationAnimations.fadeOutTransition() }
         ) {
-            composable(Screen.Splash.route) {
+            composable(
+                route = Screen.Splash.route,
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() }
+            ) {
                 SplashScreen(
                     settingsLoaded = settingsLoaded,
                     shouldShowOnboarding = shouldShowOnboarding,
@@ -83,7 +91,11 @@ fun MindPlayNavigation() {
                 )
             }
             
-            composable(Screen.Welcome.route) {
+            composable(
+                route = Screen.Welcome.route,
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() }
+            ) {
                 WelcomeScreen(
                     onStartClick = {
                         navController.navigate(Screen.Onboarding.route)
@@ -91,7 +103,11 @@ fun MindPlayNavigation() {
                 )
             }
 
-            composable(Screen.Onboarding.route) {
+            composable(
+                route = Screen.Onboarding.route,
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() }
+            ) {
                 OnboardingScreen(
                     onFinished = {
                         navController.navigate(Screen.Home.route) {
@@ -101,11 +117,26 @@ fun MindPlayNavigation() {
                 )
             }
             
-            composable(Screen.Home.route) {
+            composable(
+                route = Screen.Home.route,
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() },
+                popEnterTransition = { NavigationAnimations.fadeInTransition() },
+                popExitTransition = { NavigationAnimations.fadeOutTransition() }
+            ) {
+                LaunchedEffect(Unit) {
+                    soundManager.startBackgroundMusic()
+                }
                 HomeScreen()
             }
             
-            composable(Screen.Games.route) {
+            composable(
+                route = Screen.Games.route,
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() },
+                popEnterTransition = { NavigationAnimations.fadeInTransition() },
+                popExitTransition = { NavigationAnimations.fadeOutTransition() }
+            ) {
                 GamesScreen(
                     onNavigateToGame = { gameId ->
                         when (gameId) {
@@ -122,10 +153,10 @@ fun MindPlayNavigation() {
             
             composable(
                 route = Screen.GameArytmetyka.route,
-                enterTransition = { NavigationAnimations.slideInFromRightTransition() },
-                exitTransition = { NavigationAnimations.slideOutToLeftTransition() },
-                popEnterTransition = { NavigationAnimations.slideInFromLeftTransition() },
-                popExitTransition = { NavigationAnimations.slideOutToRightTransition() }
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() },
+                popEnterTransition = { NavigationAnimations.fadeInTransition() },
+                popExitTransition = { NavigationAnimations.fadeOutTransition() }
             ) {
                 ArithmeticGameScreen(
                     onBack = { navController.popBackStack() },
@@ -135,7 +166,13 @@ fun MindPlayNavigation() {
                 )
             }
 
-            composable(Screen.GamePuzzle.route) {
+            composable(
+                route = Screen.GamePuzzle.route,
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() },
+                popEnterTransition = { NavigationAnimations.fadeInTransition() },
+                popExitTransition = { NavigationAnimations.fadeOutTransition() }
+            ) {
                 PuzzleGameScreen(
                     onBack = { navController.popBackStack() }
                 )
@@ -143,10 +180,10 @@ fun MindPlayNavigation() {
             
             composable(
                 route = Screen.GameSimon.route,
-                enterTransition = { NavigationAnimations.slideInFromRightTransition() },
-                exitTransition = { NavigationAnimations.slideOutToLeftTransition() },
-                popEnterTransition = { NavigationAnimations.slideInFromLeftTransition() },
-                popExitTransition = { NavigationAnimations.slideOutToRightTransition() }
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() },
+                popEnterTransition = { NavigationAnimations.fadeInTransition() },
+                popExitTransition = { NavigationAnimations.fadeOutTransition() }
             ) {
                 SimonGameScreen(
                     onBack = { navController.popBackStack() },
@@ -158,10 +195,10 @@ fun MindPlayNavigation() {
             
             composable(
                 route = Screen.GameUwaga.route,
-                enterTransition = { NavigationAnimations.slideInFromRightTransition() },
-                exitTransition = { NavigationAnimations.slideOutToLeftTransition() },
-                popEnterTransition = { NavigationAnimations.slideInFromLeftTransition() },
-                popExitTransition = { NavigationAnimations.slideOutToRightTransition() }
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() },
+                popEnterTransition = { NavigationAnimations.fadeInTransition() },
+                popExitTransition = { NavigationAnimations.fadeOutTransition() }
             ) {
                 UwagaGameScreen(
                     onBack = { navController.popBackStack() },
@@ -171,22 +208,40 @@ fun MindPlayNavigation() {
                 )
             }
             
-            composable(Screen.Settings.route) {
+            composable(
+                route = Screen.Settings.route,
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() },
+                popEnterTransition = { NavigationAnimations.fadeInTransition() },
+                popExitTransition = { NavigationAnimations.fadeOutTransition() }
+            ) {
                 SettingsScreen()
             }
-            
-            // Game: Memory
+
             composable(
                 route = Screen.GameMemory.route,
-                enterTransition = { NavigationAnimations.slideInFromRightTransition() },
-                exitTransition = { NavigationAnimations.slideOutToLeftTransition() },
-                popEnterTransition = { NavigationAnimations.slideInFromLeftTransition() },
-                popExitTransition = { NavigationAnimations.slideOutToRightTransition() }
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() },
+                popEnterTransition = { NavigationAnimations.fadeInTransition() },
+                popExitTransition = { NavigationAnimations.fadeOutTransition() }
             ) {
                 MemoryScreen(
                     onBack = { navController.popBackStack() },
-                    onFinish = { score -> 
-                        // Score saved in ViewModel
+                    onFinish = { score ->
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.GamePary.route,
+                enterTransition = { NavigationAnimations.fadeInTransition() },
+                exitTransition = { NavigationAnimations.fadeOutTransition() },
+                popEnterTransition = { NavigationAnimations.fadeInTransition() },
+                popExitTransition = { NavigationAnimations.fadeOutTransition() }
+            ) {
+                ParyScreen(
+                    onBack = { navController.popBackStack() },
+                    onFinish = { score ->
                     }
                 )
             }
