@@ -11,6 +11,7 @@ import com.mind.play.domain.repository.ProgressRepository
 import com.mind.play.ui.dashboard.DashboardViewModel
 import com.mind.play.ui.games.arithmetic.ArithmeticViewModel
 import com.mind.play.ui.games.memory.MemoryViewModel
+import com.mind.play.ui.games.puzzle.PuzzleViewModel
 import com.mind.play.ui.games.simon.SimonViewModel
 import com.mind.play.ui.games.uwaga.UwagaViewModel
 import com.mind.play.ui.onboarding.OnboardingViewModel
@@ -42,6 +43,7 @@ val appModule = module {
     viewModel { SettingsViewModel(get()) }
     viewModel { ArithmeticViewModel(get(), get()) }
     viewModel { MemoryViewModel(get(), get()) }
+    viewModel { PuzzleViewModel(get(), get()) }
     viewModel { SimonViewModel(get()) }
     viewModel { UwagaViewModel(get(), get()) }
 }
